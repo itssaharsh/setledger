@@ -237,9 +237,13 @@
       "rollback": "git revert",
       "title": "Embedding fallback + degraded mode",
       "milestone": "M2 intelligence",
-      "status": "doing",
+      "status": "done",
       "base": "34cbd89",
-      "started_after": 40
+      "started_after": 40,
+      "evidence": [
+        "E0045",
+        "E0046"
+      ]
     },
     {
       "id": "T08",

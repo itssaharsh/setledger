@@ -256,15 +256,23 @@ def scan_full(set_path: Path, tracks: list[TrackRow], store, embedder=None,
     matched = [p for p in plays if p.status == "matched"]
     set_dur = max((p.t_end for p in plays), default=0.0)
     nominated: dict[str, list[str]] = {}
-    for rv in [p for p in plays if p.status == "review"]:
-        seg = tmp / f"seg_{rv.t_start:.0f}_{rv.t_end:.0f}.wav"
-        _slice_wav(set_path, rv.t_start, rv.t_end, seg)
+    # worklist: a review segment can hold remainders of SEVERAL plays, so after each
+    # confirmed claim the carved sub-gaps go back on the list (bounded per segment)
+    work = [(p.t_start, p.t_end, 4) for p in plays if p.status == "review"]
+    while work:
+        t0, t1, budget = work.pop()
+        if budget == 0 or t1 - t0 < GAP_REVIEW_S:
+            continue
+        seg = tmp / f"seg_{t0:.0f}_{t1:.0f}.wav"
+        _slice_wav(set_path, t0, t1, seg)
         cand_ids = nominate(embedder.embed_path(seg), store)
         cands = [by_id[c] for c in cand_ids if c in by_id]
         if not cands:
             continue
-        nominated[f"{rv.t_start:.0f}-{rv.t_end:.0f}"] = [c.file for c in cands]
-        play = confirm_candidates(set_path, rv.t_start, rv.t_end, cands, tmp, seg_path=seg)
+        nominated[f"{t0:.0f}-{t1:.0f}"] = [c.file for c in cands]
+        play = confirm_candidates(set_path, t0, t1, cands, tmp, seg_path=seg)
         if play is not None:
             matched.append(play)
+            work.append((t0, play.t_start, budget - 1))
+            work.append((play.t_end, t1, budget - 1))
     return ScanResult(_with_review_gaps(matched, set_dur), False, nominated)

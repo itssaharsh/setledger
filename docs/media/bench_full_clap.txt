@@ -1,0 +1,6 @@
+scan 25.8s on 423s set, 25-track crate
+tier       plays  found  partial    rate
+clean          5      5        0    100%
+shifted        2      2        0    100%
+foreign        1      0        0      0%
+precision 100%   false claims 0   foreign wrongly claimed 0
