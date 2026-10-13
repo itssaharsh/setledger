@@ -1,0 +1,9 @@
+[project]
+name = "setledger"
+version = "0.1.0"
+description = "DJ set recording -> own-crate matched tracklist -> PRS-format royalty submission pack"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

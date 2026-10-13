@@ -1,0 +1,14 @@
+{
+  "name": "dev.to Hacktoberfest W2: Side Hustle",
+  "start": "2026-10-12T19:01:08Z",
+  "end": "2026-10-19T06:59:00Z",
+  "freeze": "2026-10-18T12:16:03Z",
+  "source": "https://dev.to/devteam/join-the-hacktoberfest-open-source-ai-challenge-side-hustle-2550-in-prizes-across-18-winners-55ba",
+  "history": "strict",
+  "tz_min": 330,
+  "card_chars": 180,
+  "sponsors": [
+    "DigitalOcean,Tiger Data,Gemma,Entire,.tech"
+  ],
+  "set_at": "2026-10-13T10:30:13Z"
+}
