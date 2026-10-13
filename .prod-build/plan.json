@@ -86,7 +86,14 @@
       ],
       "rollback": "git revert",
       "title": "Set scanner (exact)",
-      "milestone": "M1 vertical slice"
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "4931118",
+      "started_after": 7,
+      "evidence": [
+        "E0010",
+        "E0011"
+      ]
     },
     {
       "id": "T04",
