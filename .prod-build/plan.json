@@ -56,7 +56,14 @@
       ],
       "rollback": "git revert",
       "title": "Crate indexer",
-      "milestone": "M1 vertical slice"
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "e5d9883",
+      "started_after": 4,
+      "evidence": [
+        "E0006",
+        "E0007"
+      ]
     },
     {
       "id": "T03",
