@@ -147,7 +147,10 @@
       ],
       "rollback": "git revert",
       "title": "PRS pack export",
-      "milestone": "M1 vertical slice"
+      "milestone": "M1 vertical slice",
+      "status": "doing",
+      "base": "ffe817f",
+      "started_after": 17
     },
     {
       "id": "T13",
