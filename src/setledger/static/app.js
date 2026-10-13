@@ -194,8 +194,9 @@ function drawChips(items) {
   $("chips").innerHTML = items.map((p, i) =>
     p.status === "review"
       ? `<span class="chip chip-review">${fmtT(p.t_start)} review</span>`
-      : `<span class="chip" data-i="${i}"><span class="glyph-${p.method}">${methodGlyph(p.method)}</span> ` +
-        `${fmtT(p.t_start)}–${fmtT(p.t_end)} · ${p.confidence.toFixed(2)}</span>`).join("");
+      : `<button class="chip" data-i="${i}" aria-label="claim ${esc(title(p.track_file))} at ${fmtT(p.t_start)}">` +
+        `<span class="glyph-${p.method}">${methodGlyph(p.method)}</span> ` +
+        `${fmtT(p.t_start)}–${fmtT(p.t_end)} · ${p.confidence.toFixed(2)}</button>`).join("");
   [...document.querySelectorAll(".chip[data-i]")].forEach((el) =>
     el.addEventListener("click", () => selectClaim(items, +el.dataset.i)));
 }

@@ -331,7 +331,14 @@
       ],
       "rollback": "n/a",
       "title": "Security/cleanup/design gate",
-      "milestone": "M3 surface"
+      "milestone": "M3 surface",
+      "status": "done",
+      "base": "d65af80",
+      "started_after": 50,
+      "evidence": [
+        "E0051",
+        "E0052"
+      ]
     },
     {
       "id": "T11",

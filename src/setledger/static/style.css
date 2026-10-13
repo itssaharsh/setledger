@@ -42,7 +42,8 @@ main{padding:14px 20px 8px}
 #chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 4px 4px}
 .chip{font-family:var(--ff-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-sm);
   background:var(--surface-2);color:var(--accent);border:1px solid var(--line);
-  cursor:pointer;animation:land .12s ease-out}
+  cursor:pointer;animation:land .12s ease-out;display:inline-block}
+button.chip:hover{border-color:var(--line-input)}
 .chip .glyph-exact{color:var(--data-exact)}
 .chip .glyph-embedding{color:var(--data-embedding)}
 .chip-review{color:var(--data-review);border-style:dashed;cursor:default}
