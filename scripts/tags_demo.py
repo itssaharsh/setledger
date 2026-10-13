@@ -30,7 +30,7 @@ def mess(title: str, artist: str, rng) -> tuple[str, str]:
         rest = " ".join(artist.split()[1:]) or first
         return f"{title}   master", f"{first} feat. {rest}"
     if style == 3:
-        return f"{title.lower()} - {artist}", "unknown"
+        return f"{artist} - {title.lower()}", "unknown"  # the "Artist - Title" filename convention
     return title, artist  # already clean
 
 
@@ -60,8 +60,9 @@ def main() -> int:
           f"{changed}/{len(sugg)} tags normalized"
           + (f"; {guarded} rows degraded to passthrough by the vocabulary guard." if live else "."),
           "", before_after_table(sugg), "",
-          "_Guard: every word in a suggestion must already appear in the raw tag — "
-          "the model may reformat, never invent._"]
+          "_Guard (two-sided): every word in a suggestion must already appear in the raw tag, "
+          "and every non-noise word in the raw tag must survive into the suggestion — "
+          "the model may reformat, never invent and never lose._"]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text("\n".join(md))
     print(f"changed {changed}/{len(sugg)}  -> {OUT.relative_to(ROOT)}")

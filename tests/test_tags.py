@@ -29,8 +29,10 @@ GOOD = json.dumps({"artist": "DJ Sable", "title": "Midnight Circuit",
                    "mix": "Extended Mix", "featured": ["Nia Rao"], "confidence": 0.9})
 UNCHANGED = json.dumps({"artist": "Mara V", "title": "Glasshouse",
                         "mix": None, "featured": [], "confidence": 0.95})
-INVENTED = json.dumps({"artist": "DJ Sable", "title": "Midnight Circuit (Radio Edit)",
+INVENTED = json.dumps({"artist": "DJ Sable", "title": "Midnight Circuit (Dub Cut)",
                        "mix": None, "featured": [], "confidence": 0.9})
+DROPPED = json.dumps({"artist": "Mara", "title": "Glasshouse",   # lost the "V"
+                      "mix": None, "featured": [], "confidence": 0.9})
 
 
 def test_no_client_is_passthrough():
@@ -60,6 +62,38 @@ def test_vocab_guard_blocks_invented_words():
     assert out[0].method == "passthrough"
     assert out[1].method == "gemma"
     assert not vocab_guard(ROWS[0]["artist"], ROWS[0]["title"], json.loads(INVENTED))
+
+
+def test_vocab_guard_blocks_dropped_words():
+    # the model lost the "V" in "Mara V" -> that row degrades to passthrough
+    out = normalize_tags(ROWS[1:], client=FakeClient([DROPPED]))
+    assert out[0].method == "passthrough"
+    assert not vocab_guard(ROWS[1]["artist"], ROWS[1]["title"], json.loads(DROPPED))
+
+
+def test_preclean():
+    from setledger.tags import preclean
+    assert preclean("MIDNIGHT_HARBOUR_FINAL_v2") == "MIDNIGHT HARBOUR FINAL v2"
+    assert preclean("  a   b ") == "a b"
+
+
+def test_placeholder_artist_forces_extraction():
+    from setledger.tags import preclean_artist
+    assert preclean_artist("unknown") == "" and preclean_artist("Mara V") == "Mara V"
+    row = {"file": "c.wav", "title": "Delta Verma - hollow tide", "artist": "unknown"}
+    good = json.dumps({"artist": "Delta Verma", "title": "Hollow Tide",
+                       "mix": None, "featured": [], "confidence": 0.8})
+    echo = json.dumps({"artist": "Unknown", "title": "Delta Verma - Hollow Tide",
+                       "mix": None, "featured": [], "confidence": 0.7})
+    assert normalize_tags([row], client=FakeClient([good]))[0].artist == "Delta Verma"
+    # echoing 'Unknown' is now an invention (placeholder was blanked) -> passthrough
+    assert normalize_tags([row], client=FakeClient([echo]))[0].method == "passthrough"
+
+
+def test_junk_mix_is_dropped():
+    from setledger.tags import _clean_mix
+    assert _clean_mix("Final v2") is None and _clean_mix("320") is None
+    assert _clean_mix("Extended Mix") == "Extended Mix" and _clean_mix(None) is None
 
 
 def test_malformed_output_is_passthrough():
