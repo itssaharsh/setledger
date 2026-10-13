@@ -1,0 +1,50 @@
+[
+ {
+  "track_file": "1013_Neon_Harbour.wav",
+  "t_start": 0.0,
+  "t_end": 56.0,
+  "tempo_shift": 1.0
+ },
+ {
+  "track_file": "1010_Midnight_Circuit.wav",
+  "t_start": 53.0,
+  "t_end": 112.077,
+  "tempo_shift": 1.0
+ },
+ {
+  "track_file": "1014_Hollow_Signal.wav",
+  "t_start": 109.077,
+  "t_end": 167.077,
+  "tempo_shift": 1.0
+ },
+ {
+  "track_file": "1019_Wild_Motor.wav",
+  "t_start": 164.077,
+  "t_end": 226.516,
+  "tempo_shift": 1.0
+ },
+ {
+  "track_file": "1017_Glass_Meridian.wav",
+  "t_start": 223.516,
+  "t_end": 282.593,
+  "tempo_shift": 1.0
+ },
+ {
+  "track_file": "1016_Paper_Garden.wav",
+  "t_start": 279.593,
+  "t_end": 338.032,
+  "tempo_shift": 1.06
+ },
+ {
+  "track_file": null,
+  "t_start": 335.032,
+  "t_end": 365.508,
+  "tempo_shift": 1.0
+ },
+ {
+  "track_file": "1002_Static_Lantern.wav",
+  "t_start": 362.508,
+  "t_end": 422.508,
+  "tempo_shift": 0.95
+ }
+]
