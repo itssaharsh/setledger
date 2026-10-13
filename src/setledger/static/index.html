@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SetLedger</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%2310141F'/><path d='M3 10h2v3H3zM6 6h2v7H6zM9 8h2v5H9zM12 4h2v9h-2z' fill='%23FFA41B'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700&family=Familjen+Grotesk:ital,wght@0,400;0,500;0,700;1,400&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="wordmark">SetLedger</span>
+    <span class="descriptor">every play, claimed with evidence</span>
+  </div>
+  <div class="header-actions">
+    <button id="scan-btn" class="btn-primary">Scan Saturday&rsquo;s set</button>
+    <button id="export-btn" class="btn-secondary" hidden>Export pack</button>
+    <button id="again-btn" class="btn-ghost" hidden>scan again</button>
+  </div>
+</header>
+
+<div id="degraded-banner" class="banner" hidden>
+  Embedding model unavailable &mdash; running exact-only. Shifted plays may be missed, never misclaimed.
+</div>
+<div id="error-banner" class="banner banner-error" hidden></div>
+
+<aside id="judge-card">
+  <strong>How to judge this in 90 seconds</strong>
+  <ol>
+    <li>Press <em>Scan Saturday&rsquo;s set</em></li>
+    <li>Watch claims land on the waveform with confidence</li>
+    <li>Click a blue <span class="mono">&asymp;</span> chip &mdash; that play is tempo-shifted, caught by embeddings and confirmed by fingerprints</li>
+    <li>The amber span stays unclaimed: no evidence, no claim</li>
+    <li>Download the PRS pack</li>
+  </ol>
+  <button id="judge-dismiss" class="btn-ghost">dismiss</button>
+</aside>
+
+<main>
+  <section id="stage">
+    <div id="stage-status" class="mono"></div>
+    <canvas id="timeline"></canvas>
+    <div id="chips"></div>
+  </section>
+
+  <section id="lower">
+    <div id="claims-panel">
+      <h2>Claims</h2>
+      <div id="claims-list"><p class="muted" id="claims-hint">Press Scan &mdash; this demo ships with a 7-minute set recording and a 25-track crate, all builder-owned synthetic audio.</p></div>
+    </div>
+    <div id="side-panel">
+      <div id="detail" hidden>
+        <h2>Claim detail</h2>
+        <div id="detail-body"></div>
+      </div>
+      <div id="export-box" hidden>
+        <h2>PRS pack</h2>
+        <div id="export-body"></div>
+      </div>
+      <details id="crate">
+        <summary>Crate &mdash; <span id="crate-count">0</span> tracks</summary>
+        <ul id="crate-list"></ul>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span id="bench-line">Measured: <span class="mono" id="bench-summary">loading&hellip;</span></span>
+  <a href="#" id="bench-link">see the benchmark</a>
+  <span class="muted">Demo: builder-owned synthetic crate + set (see corpus notes in the repo)</span>
+</footer>
+
+<dialog id="bench-dialog">
+  <h2>Measured numbers</h2>
+  <div id="bench-body" class="mono"></div>
+  <form method="dialog"><button class="btn-secondary">close</button></form>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

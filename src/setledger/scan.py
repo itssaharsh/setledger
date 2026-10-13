@@ -243,11 +243,19 @@ class ScanResult:
 
 
 def scan_full(set_path: Path, tracks: list[TrackRow], store, embedder=None,
-              progress=None, tmp_dir: Path | None = None) -> ScanResult:
-    """Exact scan, then embedding nomination + exact confirmation on review segments."""
+              progress=None, tmp_dir: Path | None = None, on_claim=None) -> ScanResult:
+    """Exact scan, then embedding nomination + exact confirmation on review segments.
+
+    on_claim(play, phase): called as claims land ('exact' once per exact play, then
+    'embedding' per confirmed recall claim) — the UI streams these onto the timeline.
+    """
     from .embed import nominate
 
     plays = scan_exact(set_path, tracks, progress)
+    if on_claim:
+        for p in plays:
+            if p.status == "matched":
+                on_claim(p, "exact")
     degraded = embedder is None or not embedder.available()
     if degraded:
         return ScanResult(plays, True)
@@ -273,6 +281,8 @@ def scan_full(set_path: Path, tracks: list[TrackRow], store, embedder=None,
         play = confirm_candidates(set_path, t0, t1, cands, tmp, seg_path=seg)
         if play is not None:
             matched.append(play)
+            if on_claim:
+                on_claim(play, "embedding")
             work.append((t0, play.t_start, budget - 1))
             work.append((play.t_end, t1, budget - 1))
     return ScanResult(_with_review_gaps(matched, set_dur), False, nominated)

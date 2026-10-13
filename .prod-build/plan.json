@@ -301,7 +301,14 @@
       ],
       "rollback": "git revert",
       "title": "Web UI + seeded demo",
-      "milestone": "M3 surface"
+      "milestone": "M3 surface",
+      "status": "done",
+      "base": "cd776a7",
+      "started_after": 46,
+      "evidence": [
+        "E0049",
+        "E0050"
+      ]
     },
     {
       "id": "T10",
