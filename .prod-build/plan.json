@@ -259,7 +259,10 @@
       ],
       "rollback": "git revert",
       "title": "Gemma tag normalization",
-      "milestone": "M2 intelligence"
+      "milestone": "M2 intelligence",
+      "status": "doing",
+      "base": "46511e9",
+      "started_after": 28
     },
     {
       "id": "T09",
