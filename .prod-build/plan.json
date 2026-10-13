@@ -1,5 +1,5 @@
 {
-  "suite": "python3 -m pytest -q",
+  "suite": ".venv/bin/python -m pytest -q",
   "tasks": [
     {
       "id": "T01",
@@ -19,7 +19,7 @@
         "every corpus file has a recorded license"
       ],
       "verify": [
-        "python3 -m pytest -q tests/test_mixgen.py"
+        ".venv/bin/python -m pytest -q tests/test_mixgen.py"
       ],
       "rollback": "git revert task commits",
       "title": "Corpus + mix generator",
@@ -52,7 +52,7 @@
         "re-index is idempotent"
       ],
       "verify": [
-        "python3 -m pytest -q tests/test_index.py"
+        ".venv/bin/python -m pytest -q tests/test_index.py"
       ],
       "rollback": "git revert",
       "title": "Crate indexer",
@@ -82,7 +82,7 @@
         "timestamps within ±2s of truth on clean segments"
       ],
       "verify": [
-        "python3 -m pytest -q tests/test_scan.py"
+        ".venv/bin/python -m pytest -q tests/test_scan.py"
       ],
       "rollback": "git revert",
       "title": "Set scanner (exact)",
@@ -112,7 +112,7 @@
         "clean-tier threshold asserted in tests"
       ],
       "verify": [
-        "python3 -m pytest -q tests/test_bench.py"
+        ".venv/bin/python -m pytest -q tests/test_bench.py"
       ],
       "rollback": "git revert",
       "title": "Benchmark harness",
@@ -143,14 +143,18 @@
         "unreleased flag column present"
       ],
       "verify": [
-        "python3 -m pytest -q tests/test_export.py"
+        ".venv/bin/python -m pytest -q tests/test_export.py"
       ],
       "rollback": "git revert",
       "title": "PRS pack export",
       "milestone": "M1 vertical slice",
-      "status": "doing",
+      "status": "done",
       "base": "ffe817f",
-      "started_after": 17
+      "started_after": 17,
+      "evidence": [
+        "E0022",
+        "E0023"
+      ]
     },
     {
       "id": "T13",
@@ -196,7 +200,7 @@
         "hybrid tag+vector query works"
       ],
       "verify": [
-        "python3 -m pytest -q tests/test_store_vector.py"
+        ".venv/bin/python -m pytest -q tests/test_store_vector.py"
       ],
       "rollback": "git revert",
       "title": "pgvector store online",
@@ -222,7 +226,7 @@
         "model-unavailable -> exact-only mode flagged"
       ],
       "verify": [
-        "python3 -m pytest -q tests/test_embed.py tests/test_degraded.py"
+        ".venv/bin/python -m pytest -q tests/test_embed.py tests/test_degraded.py"
       ],
       "rollback": "git revert",
       "title": "Embedding fallback + degraded mode",
@@ -244,7 +248,7 @@
         "messy tag -> canonical suggestion with confidence; fallback passthrough when model absent"
       ],
       "verify": [
-        "python3 -m pytest -q tests/test_tags.py"
+        ".venv/bin/python -m pytest -q tests/test_tags.py"
       ],
       "rollback": "git revert",
       "title": "Gemma tag normalization",
@@ -273,7 +277,7 @@
         "states: loading/empty/error/review/degraded all reachable via ?state= or real paths"
       ],
       "verify": [
-        "python3 -m pytest -q tests/test_app.py"
+        ".venv/bin/python -m pytest -q tests/test_app.py"
       ],
       "rollback": "git revert",
       "title": "Web UI + seeded demo",
@@ -295,7 +299,7 @@
         "secrets scan clean; upload cap enforced and tested; no stray debug files"
       ],
       "verify": [
-        "python3 -m pytest -q",
+        ".venv/bin/python -m pytest -q",
         "git grep -l 'TODO-DEBUG' -- src || true"
       ],
       "rollback": "n/a",
