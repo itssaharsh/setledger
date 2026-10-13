@@ -48,6 +48,25 @@ class MemoryStore:
     def set_embeddings(self, track_id: int, windows: np.ndarray) -> None:
         self.tracks[track_id].embedding_windows = windows
 
+    def nearest_windows(self, query: np.ndarray, k: int = 8) -> list[tuple[int, int, float]]:
+        """Brute-force cosine distance; same contract as PgStore.nearest_windows."""
+        q = np.asarray(query, dtype=np.float32)
+        qn = np.linalg.norm(q)
+        if qn == 0:
+            return []
+        hits: list[tuple[float, int, int]] = []
+        for tr in self.tracks.values():
+            if tr.embedding_windows is None or len(tr.embedding_windows) == 0:
+                continue
+            w = tr.embedding_windows
+            norms = np.linalg.norm(w, axis=1) * qn
+            norms[norms == 0] = 1.0
+            dists = 1.0 - (w @ q) / norms
+            for i, d in enumerate(dists):
+                hits.append((float(d), tr.id, i))
+        hits.sort()
+        return [(tid, wi, d) for d, tid, wi in hits[:k]]
+
     def count(self) -> int:
         return len(self.tracks)
 

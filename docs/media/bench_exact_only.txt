@@ -1,4 +1,4 @@
-scan 2.6s on 423s set, 25-track crate
+scan 2.7s on 423s set, 25-track crate
 tier       plays  found  partial    rate
 clean          5      5        0    100%
 shifted        2      0        2      0%
