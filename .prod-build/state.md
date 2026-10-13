@@ -1,6 +1,6 @@
 # state
 
-## Done (11/15)
+## Done (10/15)
 M1 vertical slice: T01-T05, T13. M2 intelligence: T07, T08 (T06 pg user-gated).
 M3 surface: T09, T10.
 
