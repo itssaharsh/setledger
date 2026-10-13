@@ -176,7 +176,14 @@
       ],
       "rollback": "n/a",
       "title": "Backup take (record)",
-      "milestone": "M1 vertical slice"
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "4f3e0dd",
+      "started_after": 23,
+      "evidence": [
+        "E0027",
+        "E0028"
+      ]
     },
     {
       "id": "T06",
