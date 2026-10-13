@@ -19,7 +19,7 @@ MATCH_BER = 0.28          # max mean bit-error rate for an exact match
 RUN_BER = 0.32            # per-position threshold when trimming the matched run
 MIN_OVERLAP_S = 12.0      # shortest overlap considered
 MIN_PLAY_S = 15.0         # shortest reported play
-GAP_REVIEW_S = 20.0       # uncovered gaps at least this long become review segments
+GAP_REVIEW_S = 10.0       # uncovered gaps at least this long become review segments
 
 
 @dataclass
@@ -44,6 +44,11 @@ def best_alignment(set_fp: np.ndarray, track_fp: np.ndarray,
                    min_overlap: int, lag_stride: int = 2):
     """Scan alignment lags; return (lag, mean_ber, per_item_ber) of the best lag or None."""
     Ls, Lt = len(set_fp), len(track_fp)
+    # Loop-based music self-matches at bar-multiple offsets, so the lowest-error lag can be
+    # a short self-similar alignment, and the longest raw overlap dilutes error over
+    # non-play audio. The right objective is the longest LOW-ERROR RUN: collect candidate
+    # lags, then pick the one whose trimmed run (what we would actually claim) is longest.
+    cands: list[tuple[float, int, int]] = []  # (ber, lag, n)
     best = None
     for lag in range(-(Lt - min_overlap), Ls - min_overlap, lag_stride):
         s0, t0 = max(0, lag), max(0, -lag)
@@ -54,8 +59,27 @@ def best_alignment(set_fp: np.ndarray, track_fp: np.ndarray,
         ber = float(popcount32(xor).sum()) / (32.0 * n)
         if best is None or ber < best[1]:
             best = (lag, ber)
+        if ber <= MATCH_BER * 1.5:
+            cands.append((ber, lag, n))
     if best is None:
         return None
+    if cands:
+        cands.sort()
+        best_run = None  # (run_len, -run_ber, lag)
+        for ber, lag, n in cands[:12]:
+            s0, t0 = max(0, lag), max(0, -lag)
+            m = min(Ls - s0, Lt - t0)
+            per_c = popcount32(np.bitwise_xor(set_fp[s0:s0 + m], track_fp[t0:t0 + m])).astype(np.float32) / 32.0
+            run = _run_bounds(per_c, RUN_BER)
+            if run is None:
+                continue
+            run_len = run[1] - run[0]
+            run_ber = float(per_c[run[0]:run[1]].mean())
+            key = (run_len, -run_ber)
+            if best_run is None or key > best_run[0]:
+                best_run = (key, lag, ber)
+        if best_run is not None:
+            best = (best_run[1], best_run[2])
     # refine ±(stride-1) around the best lag
     lag0 = best[0]
     for lag in range(lag0 - lag_stride + 1, lag0 + lag_stride):

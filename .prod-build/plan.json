@@ -116,7 +116,14 @@
       ],
       "rollback": "git revert",
       "title": "Benchmark harness",
-      "milestone": "M1 vertical slice"
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "01f5fc8",
+      "started_after": 11,
+      "evidence": [
+        "E0016",
+        "E0017"
+      ]
     },
     {
       "id": "T05",
