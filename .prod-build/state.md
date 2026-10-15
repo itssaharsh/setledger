@@ -24,5 +24,8 @@ Repo history still carries ~380MB of removed generated audio. Fix = one
 3. .tech domain claim (hacktoberfest.com/my/promos) -> T11 URL.
 
 ## Next without user
-Draft README (T12 body minus URL), draft DEV post skeleton. Demo world regenerates via
+DONE Oct 15: README judge-ready (submit check 0 FAIL), DEV post drafted at
+../hackathon-idea/hf26-week2-side-hustle/post-draft.md (placeholders: URL, GIF, repo link).
+Remaining without user: nothing big — next steps are deploy (DO token), Tiger live run (DSN),
+GitHub push (needs history-rewrite decision), final take + publish. Demo world regenerates via
 scripts/fetch_corpus.py; server: uvicorn setledger.app:app --app-dir src (port 8000).
