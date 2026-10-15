@@ -73,6 +73,8 @@ class MemoryStore:
 
 SCHEMA = """
 CREATE EXTENSION IF NOT EXISTS vector;
+CREATE SCHEMA IF NOT EXISTS %(schema)s;
+SET search_path TO %(schema)s, public;
 CREATE TABLE IF NOT EXISTS tracks (
   id SERIAL PRIMARY KEY,
   file TEXT UNIQUE NOT NULL,
@@ -95,15 +97,25 @@ CREATE INDEX IF NOT EXISTS track_windows_vec ON track_windows
 
 
 class PgStore:
-    """Postgres + pgvector driver. Connect with a DSN (Tiger Data cloud or local docker)."""
+    """Postgres + pgvector driver. Connect with a DSN (Tiger Data cloud or local docker).
 
-    def __init__(self, dsn: str, dim: int = 768) -> None:
+    `schema` namespaces all tables (search_path is set for the session), so tests and
+    the demo can share one managed service without touching each other's rows.
+    """
+
+    def __init__(self, dsn: str, dim: int = 768, schema: str = "setledger") -> None:
         import psycopg  # deferred: optional in test envs
         self._psycopg = psycopg
         self.conn = psycopg.connect(dsn, autocommit=True)
         self.dim = dim
+        self.schema = schema
         with self.conn.cursor() as cur:
-            cur.execute(SCHEMA % {"dim": dim})
+            cur.execute(SCHEMA % {"dim": dim, "schema": schema})
+
+    def drop_schema(self) -> None:
+        """Remove this namespace entirely (test cleanup)."""
+        with self.conn.cursor() as cur:
+            cur.execute(f"DROP SCHEMA IF EXISTS {self.schema} CASCADE")
 
     def upsert_track(self, file: str, title: str, artist: str, duration: float,
                      fingerprint: np.ndarray, registered: bool = False) -> int:
@@ -145,6 +157,29 @@ class PgStore:
                 """SELECT track_id, w_index, embedding <=> %s::vector AS dist
                    FROM track_windows ORDER BY dist ASC LIMIT %s""",
                 (vec, k),
+            )
+            return [(r[0], r[1], float(r[2])) for r in cur.fetchall()]
+
+    def nearest_windows_hybrid(self, query: np.ndarray, k: int = 8,
+                               registered: bool | None = None,
+                               artist: str | None = None) -> list[tuple[int, int, float]]:
+        """Vector search constrained by track metadata (tag + vector in ONE query):
+        the pgvector <=> ordering runs under a relational filter on the joined tracks row."""
+        vec = "[" + ",".join(f"{x:.6f}" for x in query) + "]"
+        conds, params = [], []
+        if registered is not None:
+            conds.append("t.registered = %s")
+            params.append(registered)
+        if artist is not None:
+            conds.append("t.artist = %s")
+            params.append(artist)
+        where = ("WHERE " + " AND ".join(conds)) if conds else ""
+        with self.conn.cursor() as cur:
+            cur.execute(
+                f"""SELECT w.track_id, w.w_index, w.embedding <=> %s::vector AS dist
+                    FROM track_windows w JOIN tracks t ON t.id = w.track_id
+                    {where} ORDER BY dist ASC LIMIT %s""",
+                [vec, *params, k],
             )
             return [(r[0], r[1], float(r[2])) for r in cur.fetchall()]
 

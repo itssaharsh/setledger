@@ -211,7 +211,10 @@
       ],
       "rollback": "git revert",
       "title": "pgvector store online",
-      "milestone": "M2 intelligence"
+      "milestone": "M2 intelligence",
+      "status": "doing",
+      "base": "b021220",
+      "started_after": 52
     },
     {
       "id": "T07",
@@ -342,14 +345,15 @@
     },
     {
       "id": "T11",
-      "objective": "Deploy: DO droplet docker-compose (app+pg) with seeded demo, .tech domain, smoke + browser pass signed out (BLOCKED on user DO/.tech accounts)",
+      "objective": "Deploy to Vercel (serverless adaptation: sync scan, bundled fpcalc/ffmpeg, committed fp+embedding npz, set wav as static asset); attach setledger.<portfolio>.tech subdomain; smoke the live URL",
       "deps": [
         "T10"
       ],
       "writes": [
-        "deploy/",
-        "docker-compose.prod.yml",
-        "docs/deploy.md"
+        "api/",
+        "vercel.json",
+        "src/setledger/app.py",
+        "scripts/build_runtime_cache.py"
       ],
       "runtime": {},
       "kind": "deploy",
@@ -366,7 +370,7 @@
     },
     {
       "id": "T12",
-      "objective": "Final bench numbers + README first screen (judge card line, GIF, bench table, links) + PRS registration/filing attempt documented",
+      "objective": "Final bench numbers + README first screen (judge card line, GIF, bench table, links) + PRS registration/filing; deployed Vercel URL attempt documented",
       "deps": [
         "T07",
         "T11"
