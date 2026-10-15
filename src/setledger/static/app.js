@@ -81,7 +81,7 @@ async function pollScan() {
 }
 
 function finishScanUI(sc) {
-  $("stage-status").textContent = sc.elapsed ? `scan ${sc.elapsed}s` : "";
+  $("stage-status").textContent = sc.elapsed ? `scanned in ${sc.elapsed}s` : "";
   $("scan-btn").hidden = true;
   const n = S.plays.filter((p) => p.status === "matched").length;
   $("export-btn").textContent = `Download PRS pack (${n} plays)`;
@@ -168,7 +168,7 @@ function draw() {
       ctx.globalAlpha = 1;
       ctx.fillStyle = "#0b0f18"; ctx.font = `11px ${cssVar("--ff-mono")}`;
       if (w > 44) ctx.fillText(p.confidence.toFixed(2), x + 5, laneY + 14);
-      if (w > 120) ctx.fillText(title(p.track_file), x + 5, laneY + laneH - 7);
+      if (w > 64) ctx.fillText(title(p.track_file), x + 5, laneY + laneH - 7);
     }
     ctx.restore();
   });
@@ -193,7 +193,7 @@ function draw() {
 function drawChips(items) {
   $("chips").innerHTML = items.map((p, i) =>
     p.status === "review"
-      ? `<span class="chip chip-review">${fmtT(p.t_start)} review</span>`
+      ? `<span class="chip chip-review">${fmtT(p.t_start)}–${fmtT(p.t_end)} · review</span>`
       : `<button class="chip" data-i="${i}" aria-label="claim ${esc(title(p.track_file))} at ${fmtT(p.t_start)}">` +
         `<span class="glyph-${p.method}">${methodGlyph(p.method)}</span> ` +
         `${fmtT(p.t_start)}–${fmtT(p.t_end)} · ${p.confidence.toFixed(2)}</button>`).join("");

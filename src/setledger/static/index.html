@@ -13,7 +13,7 @@
 <header>
   <div class="brand">
     <span class="wordmark">SetLedger</span>
-    <span class="descriptor">every play, claimed with evidence</span>
+    <span class="descriptor">turns a DJ&rsquo;s set recording into royalty claims &mdash; with evidence</span>
   </div>
   <div class="header-actions">
     <button id="scan-btn" class="btn-primary">Scan Saturday&rsquo;s set</button>
@@ -27,17 +27,28 @@
 </div>
 <div id="error-banner" class="banner banner-error" hidden></div>
 
+<div id="intro-row">
 <aside id="judge-card">
   <strong>How to judge this in 90 seconds</strong>
   <ol>
     <li>Press <em>Scan Saturday&rsquo;s set</em></li>
-    <li>Watch claims land on the waveform with confidence</li>
+    <li>Watch claims land on the timeline with confidence</li>
     <li>Click a blue <span class="mono">&asymp;</span> chip &mdash; that play is tempo-shifted, caught by embeddings and confirmed by fingerprints</li>
     <li>The amber span stays unclaimed: no evidence, no claim</li>
-    <li>Download the PRS pack</li>
+    <li>Download the royalty pack (PRS-format CSV + PDF)</li>
   </ol>
   <button id="judge-dismiss" class="btn-ghost">dismiss</button>
 </aside>
+<aside id="read-card">
+  <strong>How to read a claim</strong>
+  <ul class="legend">
+    <li><span class="swatch sw-exact"></span><span class="mono glyph-exact">&#9646;</span> exact &mdash; contiguous fingerprint match, number = confidence</li>
+    <li><span class="swatch sw-embedding"></span><span class="mono glyph-embedding">&asymp;</span> tempo-shifted &mdash; nominated by embeddings, confirmed by fingerprints</li>
+    <li><span class="swatch sw-review"></span>review &mdash; no evidence, not claimed</li>
+    <li class="muted">adjacent claims overlap where tracks crossfade</li>
+  </ul>
+</aside>
+</div>
 
 <main>
   <section id="stage">
@@ -69,9 +80,9 @@
 </main>
 
 <footer>
-  <span id="bench-line">Measured: <span class="mono" id="bench-summary">loading&hellip;</span></span>
-  <a href="#" id="bench-link">see the benchmark</a>
-  <span class="muted">Demo: builder-owned synthetic crate + set (see corpus notes in the repo)</span>
+  <span id="bench-line">Benchmark on the 25-track synthetic corpus: <span class="mono" id="bench-summary">loading&hellip;</span></span>
+  <a href="#" id="bench-link">full numbers</a>
+  <span class="muted">Demo world: builder-owned synthetic crate + set (corpus notes in the repo)</span>
 </footer>
 
 <dialog id="bench-dialog">
