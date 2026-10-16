@@ -32,7 +32,11 @@ async function loadWorld() {
   renderCrate();
   applyForcedState();
   if (S.world.degraded || FORCED === "degraded") $("degraded-banner").hidden = false;
-  if (S.world.scan && S.world.scan.plays.length) {
+  if (S.world.scan && S.world.scan.running) {
+    $("scan-btn").disabled = true;
+    $("stage-status").textContent = "joining a scan already in progress…";
+    S.polling = setInterval(pollScan, 400);
+  } else if (S.world.scan && S.world.scan.plays.length) {
     S.plays = S.world.scan.plays;
     S.claims = S.plays.filter((p) => p.status === "matched");
     finishScanUI(S.world.scan);
@@ -64,7 +68,9 @@ async function startScan() {
   S.claims = []; S.plays = []; S.drawn = 0; S.selected = null;
   $("detail").hidden = true; $("export-box").hidden = true;
   const r = await fetch("/api/scan", { method: "POST" });
-  if (!r.ok) { const e = await r.json(); showError(e.error || "scan failed to start"); $("scan-btn").disabled = false; return; }
+  // 409 = another viewer's scan is running on this shared demo: watch it instead of failing
+  if (!r.ok && r.status !== 409) { const e = await r.json(); showError(e.error || "scan failed to start"); $("scan-btn").disabled = false; return; }
+  if (r.status === 409) $("stage-status").textContent = "joining a scan already in progress…";
   S.polling = setInterval(pollScan, 400);
 }
 
@@ -216,7 +222,7 @@ function selectClaim(items, i) {
     <dt>span</dt><dd class="mono">${fmtT(p.t_start)}–${fmtT(p.t_end)} (${(p.t_end - p.t_start).toFixed(0)}s)</dd>
     <dt>confidence</dt><dd class="mono">${p.confidence.toFixed(3)}</dd>
     <dt>method</dt><dd>${p.method === "embedding"
-      ? "≈ embedding recall — nominated by CLAP vectors, confirmed by a tempo-swept fingerprint run"
+      ? `≈ embedding recall — nominated by ${S.world.embedder === "clap" ? "CLAP" : "spectral-envelope"} vectors, confirmed by a tempo-swept fingerprint run`
       : "▮ exact — contiguous low bit-error chromaprint run"}</dd></dl>`;
   draw();
 }

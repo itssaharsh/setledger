@@ -82,7 +82,11 @@ generated from seeds, so the bench is deterministic end to end.
 ## Run it locally
 
 ```bash
-python -m venv .venv && .venv/bin/pip install -e . && sudo apt install ffmpeg libchromaprint-tools
+sudo apt install ffmpeg libchromaprint-tools     # fpcalc + ffmpeg
+python -m venv .venv && .venv/bin/pip install -e ".[dev]"
+# optional CLAP recall driver (without it the spectral driver runs, same pipeline):
+#   .venv/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   .venv/bin/pip install -e ".[clap]"
 .venv/bin/python scripts/fetch_corpus.py        # generate the demo world (deterministic seeds)
 .venv/bin/python scripts/demo_run.py            # index -> scan -> bench -> artifacts
 .venv/bin/python -m uvicorn setledger.app:app --app-dir src   # the workspace at :8000

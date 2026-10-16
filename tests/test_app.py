@@ -107,3 +107,13 @@ def test_pick_embedder_none_is_degraded():
         assert emb is None and name == "none"
     finally:
         os.environ["SETLEDGER_EMBEDDER"] = "spectral"
+
+
+def test_concurrent_scan_is_409_not_a_second_run(client):
+    assert client.post("/api/scan").status_code == 200
+    second = client.post("/api/scan")
+    assert second.status_code == 409          # the UI turns this into "joining a scan"
+    deadline = time.time() + 180
+    while time.time() < deadline and not client.get("/api/scan/progress").json()["done"]:
+        time.sleep(0.5)
+    assert client.get("/api/scan/progress").json()["error"] is None

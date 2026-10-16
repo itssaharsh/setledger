@@ -1,0 +1,22 @@
+[Unit]
+Description=SetLedger demo workspace
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=setledger
+WorkingDirectory=/opt/setledger
+Environment=HOME=/opt/setledger
+Environment=SETLEDGER_EMBEDDER=auto
+ExecStart=/opt/setledger/.venv/bin/uvicorn setledger.app:app --app-dir src --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=3
+# CLAP + torch fits in ~1.3 GB; cap below the 2 GB droplet so the box stays reachable
+MemoryMax=1700M
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/setledger
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

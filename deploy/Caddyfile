@@ -1,0 +1,10 @@
+# {$SETLEDGER_DOMAIN} is set in /etc/default/caddy once DNS points here; Caddy then fetches a
+# certificate on its own. Until then the bare IP serves plain HTTP for smoke tests.
+{$SETLEDGER_DOMAIN:localhost} {
+	encode gzip
+	reverse_proxy 127.0.0.1:8000
+}
+
+:80 {
+	reverse_proxy 127.0.0.1:8000
+}
