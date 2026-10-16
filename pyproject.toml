@@ -1,9 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "setledger"
 version = "0.1.0"
 description = "DJ set recording -> own-crate matched tracklist -> PRS-format royalty submission pack"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+  "numpy>=2.0",
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
+  "reportlab>=4.0",
+  "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+# CLAP recall driver. Install CPU torch first:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+clap = ["torch>=2.2", "transformers>=4.40", "soundfile>=0.12"]
+pg = ["psycopg[binary]>=3.1"]
+dev = ["pytest>=8", "httpx>=0.27", "playwright>=1.40"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+setledger = ["static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
