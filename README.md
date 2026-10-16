@@ -4,7 +4,7 @@ Clubs pay licensing; the producers a DJ actually played rarely see it. SetLedger
 recording into a timestamped, PRS-ready tracklist matched against the DJ's own crate — and it
 never claims a play it can't prove.
 
-![SetLedger scanning a set: ground truth vs claims on the timeline](docs/media/ui_scanned.png)
+![SetLedger scanning a set: exact claims land, then tempo-shifted plays are recovered (2x speed)](docs/media/demo.gif)
 
 **Live demo:** _URL coming at deploy (Oct 17–18)_ · **Demo video:** _link + length at final take_
 

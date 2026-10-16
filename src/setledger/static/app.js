@@ -46,6 +46,12 @@ function applyForcedState() {
     $("claims-hint").textContent = "0 matches — this crate and set share no audio. Index the right crate?"; }
   if (FORCED === "error") showError("Could not decode set recording: bad_upload.aac (demo of the error state)");
   if (params.get("reset") === "1") fetch("/api/reset", { method: "POST" });
+  if (params.get("record") === "1") {           // clean stage for GIF takes
+    $("intro-row")?.remove();
+    document.querySelector("footer")?.remove();
+    if (params.get("autoscan") === "1")
+      fetch("/api/reset", { method: "POST" }).then(() => setTimeout(startScan, 1200));
+  }
 }
 
 function showError(msg) { const b = $("error-banner"); b.textContent = msg; b.hidden = false; }

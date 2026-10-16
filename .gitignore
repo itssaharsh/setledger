@@ -42,3 +42,4 @@ data/crate/*.wav
 data/.tmp_scan/
 data/out/
 data/mixes/.tmp/
+docs/media/demo.mp4
