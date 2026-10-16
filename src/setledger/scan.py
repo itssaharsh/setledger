@@ -38,6 +38,31 @@ class Play:
     confidence: float
     method: str           # exact | embedding | none
     status: str           # matched | review
+    fragments: int = 1    # evidence runs joined into this one play
+
+
+MERGE_GAP_S = 5.0         # same-track claims closer than this are one physical play
+
+
+def merge_fragments(claims: list[Play]) -> list[Play]:
+    """Join adjacent claims of the same track into one play.
+
+    A tempo-shifted play is typically proven in pieces (an exact run plus recall-confirmed
+    runs either side). Reporting the pieces separately would file one play as several, so
+    they become one claim: method 'embedding' if any piece needed recall, confidence = the
+    weakest piece's (a joined claim is only as strong as its weakest evidence).
+    """
+    out: list[Play] = []
+    for c in sorted(claims, key=lambda p: p.t_start):
+        last = out[-1] if out else None
+        if last and last.track_file == c.track_file and c.t_start - last.t_end <= MERGE_GAP_S:
+            out[-1] = Play(last.track_id, last.track_file, last.t_start, max(last.t_end, c.t_end),
+                           min(last.confidence, c.confidence),
+                           "embedding" if "embedding" in (last.method, c.method) else "exact",
+                           "matched", last.fragments + c.fragments)
+        else:
+            out.append(c)
+    return out
 
 
 def _smooth(x: np.ndarray, w: int) -> np.ndarray:
@@ -164,10 +189,11 @@ def scan_exact(set_path: Path, tracks: list[TrackRow], progress=None) -> list[Pl
 
 
 def _with_review_gaps(accepted: list[Play], set_dur: float) -> list[Play]:
-    """Interleave uncovered gaps as review segments (never an invented track)."""
+    """Merge fragments, then interleave uncovered gaps as review segments (never an
+    invented track)."""
     plays: list[Play] = []
     cursor = 0.0
-    for a in sorted(accepted, key=lambda p: p.t_start) + \
+    for a in merge_fragments(accepted) + \
             [Play(None, None, set_dur, set_dur, 0.0, "none", "review")]:
         if a.t_start - cursor >= GAP_REVIEW_S:
             plays.append(Play(None, None, round(cursor, 2), round(a.t_start, 2), 0.0, "none", "review"))

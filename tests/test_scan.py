@@ -54,3 +54,23 @@ def test_unmatched_never_invented(tmp_path):
         f"foreign segment {f} not represented as review: {review}"
     assert all(p.track_id is not None for p in matched)
     assert all(p.track_id is None for p in review)
+
+
+def test_merge_fragments_joins_one_shifted_play():
+    from setledger.scan import Play, merge_fragments
+    pieces = [Play(5, "x.wav", 373.8, 393.8, 0.88, "embedding", "matched"),
+              Play(5, "x.wav", 396.5, 418.9, 0.80, "exact", "matched"),
+              Play(5, "x.wav", 418.9, 431.8, 0.79, "embedding", "matched")]
+    [m] = merge_fragments(pieces)
+    assert (m.t_start, m.t_end, m.fragments) == (373.8, 431.8, 3)
+    assert m.method == "embedding" and m.confidence == 0.79   # weakest evidence wins
+
+
+def test_merge_fragments_keeps_distinct_plays_apart():
+    from setledger.scan import Play, merge_fragments
+    a = Play(1, "a.wav", 0.0, 50.0, 0.95, "exact", "matched")
+    b = Play(2, "b.wav", 50.5, 100.0, 0.95, "exact", "matched")        # different track
+    a2 = Play(1, "a.wav", 140.0, 190.0, 0.95, "exact", "matched")      # same track, far later
+    out = merge_fragments([a2, b, a])
+    assert [(p.track_file, p.fragments) for p in out] == [("a.wav", 1), ("b.wav", 1), ("a.wav", 1)]
+    assert all(p.method == "exact" for p in out)

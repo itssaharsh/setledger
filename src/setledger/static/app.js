@@ -220,7 +220,8 @@ function selectClaim(items, i) {
   $("detail-body").innerHTML = `<dl>
     <dt>track</dt><dd>${esc(title(p.track_file))} <span class="mono muted">${esc(p.track_file || "")}</span></dd>
     <dt>span</dt><dd class="mono">${fmtT(p.t_start)}–${fmtT(p.t_end)} (${(p.t_end - p.t_start).toFixed(0)}s)</dd>
-    <dt>confidence</dt><dd class="mono">${p.confidence.toFixed(3)}</dd>
+    <dt>confidence</dt><dd class="mono">${p.confidence.toFixed(3)}${(p.fragments || 1) > 1
+      ? ` <span class="muted">(weakest of ${p.fragments} joined evidence runs)</span>` : ""}</dd>
     <dt>method</dt><dd>${p.method === "embedding"
       ? `≈ embedding recall — nominated by ${S.world.embedder === "clap" ? "CLAP" : "spectral-envelope"} vectors, confirmed by a tempo-swept fingerprint run`
       : "▮ exact — contiguous low bit-error chromaprint run"}</dd></dl>`;
@@ -240,7 +241,8 @@ function renderClaims() {
 function renderCrate() {
   $("crate-count").textContent = S.world.tracks.length;
   $("crate-list").innerHTML = S.world.tracks.map((t) =>
-    `<li>${esc(t.title)} — ${esc(t.artist)} ${t.registered ? '<span class="reg">REGISTERED</span>' : ""}</li>`).join("");
+    `<li>${esc(t.title)}${t.artist && t.artist !== "Unknown" ? " — " + esc(t.artist) : ""} ` +
+    `${t.registered ? '<span class="reg">REGISTERED</span>' : ""}</li>`).join("");
   if (S.world.skipped.length)
     $("crate-list").innerHTML += `<li class="muted">${S.world.skipped.length} file(s) skipped (undecodable)</li>`;
 }
@@ -253,11 +255,42 @@ async function loadBenchSummary() {
     $("bench-summary").textContent = line || "see benchmark";
     $("bench-link").onclick = (e) => {
       e.preventDefault();
-      $("bench-body").textContent = Object.entries(b).filter(([k]) => k !== "tags")
+      $("bench-body").textContent = Object.entries(b).filter(([k]) => k !== "tags" && k !== "ledger")
         .map(([k, v]) => `── ${k} ──\n${v}`).join("\n");
       $("bench-dialog").showModal();
     };
+    const showMd = (md, heading) => (e) => {
+      e.preventDefault();
+      $("bench-dialog").querySelector("h2").textContent = heading;
+      $("bench-body").innerHTML = mdTables(md);
+      $("bench-dialog").showModal();
+    };
+    if (b.tags) { $("tags-link").hidden = false; $("tags-link").onclick = showMd(b.tags, "Crate tag cleanup (Gemma)"); }
+    if (b.ledger) { $("ledger-link").hidden = false; $("ledger-link").onclick = showMd(b.ledger, "Quarterly statements"); }
+    $("bench-dialog").addEventListener("close", () =>
+      ($("bench-dialog").querySelector("h2").textContent = "Measured numbers"));
   } catch { $("bench-summary").textContent = "unavailable"; }
+}
+
+// Our own artifacts' markdown -> safe HTML: headings, paragraphs, pipe tables. Everything is
+// escaped first; only the structure is generated.
+function mdTables(md) {
+  const out = []; let table = null;
+  const cells = (l) => l.trim().replace(/^\||\|$/g, "").split("|").map((c) => esc(c.trim()).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"));
+  for (const line of md.split("\n")) {
+    if (line.trim().startsWith("|")) {
+      if (/^\|[\s|:-]+\|$/.test(line.trim())) continue;
+      const row = cells(line);
+      if (!table) { table = `<table class="md"><tr>${row.map((c) => `<th>${c}</th>`).join("")}</tr>`; }
+      else table += `<tr>${row.map((c) => `<td>${c}</td>`).join("")}</tr>`;
+      continue;
+    }
+    if (table) { out.push(table + "</table>"); table = null; }
+    if (line.startsWith("#")) out.push(`<h3>${esc(line.replace(/^#+\s*/, ""))}</h3>`);
+    else if (line.trim()) out.push(`<p>${esc(line).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/_(.+?)_/g, "<em>$1</em>")}</p>`);
+  }
+  if (table) out.push(table + "</table>");
+  return out.join("");
 }
 
 // ---------- wiring ----------

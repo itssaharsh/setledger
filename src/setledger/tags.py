@@ -80,6 +80,39 @@ class OllamaClient:
             return json.loads(resp.read())["response"]
 
 
+class OpenAICompatClient:
+    """Chat-completions client for OpenAI-compatible endpoints, e.g. DigitalOcean Serverless
+    Inference (https://inference.do-ai.run/v1) serving open-weight Gemma. Same interface as
+    OllamaClient, so the vocabulary guard applies unchanged to whichever model answers."""
+
+    def __init__(self, base_url: str, model: str, api_key: str, timeout: float = 60.0) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.model = model
+        self._key = api_key
+        self.timeout = timeout
+
+    def _req(self, path: str, body: dict | None = None) -> dict:
+        req = urllib.request.Request(
+            f"{self.base_url}{path}", data=json.dumps(body).encode() if body else None,
+            headers={"Authorization": f"Bearer {self._key}", "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+            return json.loads(resp.read())
+
+    def available(self) -> bool:
+        """True only if the endpoint answers AND lists this model (a guessed model id 404s)."""
+        try:
+            ids = {m.get("id") for m in self._req("/models").get("data", [])}
+            return self.model in ids
+        except (urllib.error.URLError, OSError, ValueError):
+            return False
+
+    def generate(self, prompt: str) -> str:
+        out = self._req("/chat/completions", {
+            "model": self.model, "temperature": 0,
+            "messages": [{"role": "user", "content": prompt}]})
+        return out["choices"][0]["message"]["content"]
+
+
 _WORD = re.compile(r"[A-Za-z0-9]+")
 
 # Tokens the model may drop without losing identity information.

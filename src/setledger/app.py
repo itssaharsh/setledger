@@ -184,9 +184,10 @@ def api_bench():
     out = {}
     for f in sorted(media.glob("bench_*.txt")):
         out[f.stem] = f.read_text()
-    tags = media / "tags-before-after.md"
-    if tags.exists():
-        out["tags"] = tags.read_text()
+    for key, name in (("tags", "tags-before-after.md"), ("ledger", "ledger-statement.md")):
+        f = media / name
+        if f.exists():
+            out[key] = f.read_text()
     return out
 
 

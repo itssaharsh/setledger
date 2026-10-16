@@ -4,7 +4,5 @@ performance_date,venue,start_time_s,end_time_s,duration_s,title,artist,registere
 2026-10-13,Demo Venue,109,166,57,Hollow Signal,Unknown,NO - register to claim,0.948,exact,unreleased/unregistered track flagged
 2026-10-13,Demo Venue,164,224,60,Wild Motor,Unknown,NO - register to claim,0.966,exact,unreleased/unregistered track flagged
 2026-10-13,Demo Venue,224,280,56,Glass Meridian,Unknown,NO - register to claim,0.949,exact,unreleased/unregistered track flagged
-2026-10-13,Demo Venue,286,304,18,Paper Garden,Unknown,NO - register to claim,0.808,exact,unreleased/unregistered track flagged
-2026-10-13,Demo Venue,304,336,32,Paper Garden,Unknown,NO - register to claim,0.829,embedding,unreleased/unregistered track flagged
-2026-10-13,Demo Venue,363,395,32,Static Lantern,Unknown,NO - register to claim,0.863,embedding,unreleased/unregistered track flagged
-2026-10-13,Demo Venue,398,417,20,Static Lantern,Unknown,NO - register to claim,0.782,exact,unreleased/unregistered track flagged
+2026-10-13,Demo Venue,286,336,50,Paper Garden,Unknown,NO - register to claim,0.808,embedding,unreleased/unregistered track flagged
+2026-10-13,Demo Venue,363,417,55,Static Lantern,Unknown,NO - register to claim,0.782,embedding,unreleased/unregistered track flagged

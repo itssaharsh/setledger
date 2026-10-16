@@ -107,3 +107,43 @@ def test_before_after_table():
     assert "Midnight Circuit" in md and "feat. Nia Rao" in md
     assert "(unchanged)" in md
     assert md.count("|", 0, md.index("\n")) == 6  # 5 columns
+
+
+def test_openai_compat_client_against_fake_server():
+    """Wire format for DO Serverless Inference: bearer auth, /models gate, chat completions."""
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from setledger.tags import OpenAICompatClient
+    seen = {}
+
+    class H(BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+
+        def _send(self, obj):
+            body = json.dumps(obj).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(body)
+
+        def do_GET(self):
+            seen["auth"] = self.headers.get("Authorization")
+            self._send({"data": [{"id": "gemma-test"}]})
+
+        def do_POST(self):
+            seen["body"] = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            self._send({"choices": [{"message": {"content": GOOD}}]})
+
+    srv = HTTPServer(("127.0.0.1", 0), H)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        base = f"http://127.0.0.1:{srv.server_port}/v1"
+        c = OpenAICompatClient(base, "gemma-test", "k-123")
+        assert c.available() and seen["auth"] == "Bearer k-123"
+        assert not OpenAICompatClient(base, "guessed-model-id", "k-123").available()
+        out = normalize_tags(ROWS[:1], client=c)
+        assert out[0].method == "gemma" and out[0].title == "Midnight Circuit"
+        assert seen["body"]["model"] == "gemma-test" and seen["body"]["temperature"] == 0
+    finally:
+        srv.shutdown()
