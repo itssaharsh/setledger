@@ -36,17 +36,23 @@ gets back:
 - **A PRS-format royalty pack** — CSV + PDF with timestamps, durations, confidence, method, and
   a registered/unregistered flag per work.
 
-## Measured results (deterministic bench, 25-track crate, 423 s set)
+## Measured results (6 synthetic sets, 48 plays, 25-track crate)
 
-| tier | plays | found | rate |
+| tier | plays | found (≥50% of the play) | rate |
 |---|---|---|---|
-| clean plays | 5 | 5 | **100%** |
-| tempo-shifted (±5–6%) | 2 | 2 | **100%** (via embedding recall) |
-| foreign track (not in crate) | 1 | 0 claimed | **0 false claims** |
+| clean plays | 30 | 30 | **100%** |
+| tempo-shifted (+6% / −5%) | 12 | 12 | **100%** (via embedding recall) |
+| foreign track (not in crate) | 6 | 0 claimed | **0 false claims** |
 
-Precision **100%**, scan 25.8 s (exact-only mode: 2.6 s). Reproduce with
-`scripts/fetch_corpus.py` then `scripts/demo_run.py` — the whole demo world is procedurally
-generated from seeds, so the bench is deterministic end to end.
+The demo set plus five more gigs, each generated from a different seed and scanned for real
+(~20 s per 7-minute set with CLAP; exact-only mode 2.6 s). The five-gig run is the one that
+caught a real bug: on the demo set alone, tempo-shifted looked perfect, but across five gigs it
+fell to 4/10 because one shifted play was being reported as two or three fragments
+([F-0002](docs/memory/failures/)). Fixed by joining same-track fragments into one play.
+
+Reproduce: `scripts/fetch_corpus.py`, then `scripts/demo_run.py` (demo set) and
+`scripts/ledger_demo.py` (five gigs + quarterly statements). Every byte of audio is generated
+from seeds, so the numbers are deterministic end to end.
 
 ## How it works
 
@@ -63,7 +69,15 @@ generated from seeds, so the bench is deterministic end to end.
    must exist in the raw tag and every content word must survive, so the model may reformat but
    can never invent or lose a name. No model → clean passthrough, flagged in the UI.
    Before/after artifact: [docs/media/tags-before-after.md](docs/media/tags-before-after.md).
-4. **Web UI** — FastAPI + a single canvas workspace ([UI-SPEC.md](UI-SPEC.md)); deployed on
+4. **The ledger** (**Tiger Data**, TimescaleDB) — every confirmed play from every gig lands in
+   a `plays` hypertable partitioned on `played_at`; a `plays_monthly` continuous aggregate
+   rolls them up, and the quarterly royalty statement (PRS distributes quarterly) reads the
+   pre-rolled buckets instead of rescanning every play ever recorded. Each row carries the
+   weakest evidence behind it and whether recall was needed, so a statement line is never
+   stronger than its proof. On plain Postgres the same names are a table and a view (that's
+   how the tests run without a cloud account); `Ledger.timescale` reports which one is live.
+   Example: [docs/media/ledger-statement.md](docs/media/ledger-statement.md).
+5. **Web UI** — FastAPI + a single canvas workspace ([UI-SPEC.md](UI-SPEC.md)); deployed on
    **DigitalOcean**, served at a **.tech** domain (links above when live).
 
 ## Limits — what this is and isn't
