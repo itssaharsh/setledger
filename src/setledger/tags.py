@@ -1,4 +1,4 @@
-"""Tag normalization: messy crate tags -> canonical PRS-ready suggestions via Gemma.
+"""Tag normalization: messy crate tags -> canonical artist/title suggestions via Gemma.
 
 Honest by construction: the model may only REFORMAT, never invent and never lose.
 Two-sided guard: every word in a suggestion must already appear in the raw tag, and

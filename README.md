@@ -1,8 +1,10 @@
 # SetLedger
 
 Clubs pay licensing; the producers a DJ actually played rarely see it. SetLedger turns a set
-recording into a timestamped, PRS-ready tracklist matched against the DJ's own crate — and it
-never claims a play it can't prove.
+recording into a timestamped setlist report matched against the DJ's own crate, and it never
+claims a play it can't prove. PRS already fingerprints DJ sets itself, with recognition devices
+in 46 UK venues; SetLedger runs the same technique for every other gig
+([PRS on music recognition](https://help.prsformusic.com/s/article/how-do-you-use-music-recognition-technology-to-track-dj-performances)).
 
 ![SetLedger scanning a set: exact claims land, then tempo-shifted plays are recovered (2x speed)](docs/media/demo.gif)
 
@@ -20,7 +22,7 @@ normalizes crate tags under a no-invention guard; deployed on **DigitalOcean** b
 3. Click a blue **≈** chip — that play is tempo-shifted +6%, nominated by embeddings and
    confirmed by fingerprints.
 4. Note the amber span: no evidence means no claim, it stays flagged for review.
-5. Download the royalty pack (PRS-format CSV + PDF).
+5. Download the setlist report (CSV + PDF).
 
 ## What it does
 
@@ -33,8 +35,10 @@ gets back:
 - **Review spans** — any stretch with no fingerprint evidence is marked *review — not claimed*.
   The scanner cannot invent a track by construction: candidates only come from the crate, and
   the recall layer must pass the same fingerprint bar as the exact layer.
-- **A PRS-format royalty pack** — CSV + PDF with timestamps, durations, confidence, method, and
-  a registered/unregistered flag per work.
+- **A setlist report** — CSV + PDF with what a PRS live-performance report asks for (date,
+  venue, each work and its duration; writers come with the registered work), plus the evidence:
+  timestamps, confidence, method, and a registered/unregistered flag per work (only registered
+  works can be reported).
 
 ## Measured results (6 synthetic sets, 48 plays, 25-track crate)
 
@@ -65,13 +69,14 @@ from seeds, so the numbers are deterministic end to end.
    confirm*: an atempo sweep (0.90–1.10) must produce a passing fingerprint run before anything
    is claimed, so the vector layer can extend recall but can never create a false claim.
 3. **Tag normalization** (**Gemma 3 1B**, local via ollama) — messy crate tags become
-   PRS-ready artist/title suggestions under a two-sided vocabulary guard: every output word
+   clean artist/title suggestions under a two-sided vocabulary guard: every output word
    must exist in the raw tag and every content word must survive, so the model may reformat but
    can never invent or lose a name. No model → clean passthrough, flagged in the UI.
    Before/after artifact: [docs/media/tags-before-after.md](docs/media/tags-before-after.md).
 4. **The ledger** (**Tiger Data**, TimescaleDB) — every confirmed play from every gig lands in
    a `plays` hypertable partitioned on `played_at`; a `plays_monthly` continuous aggregate
-   rolls them up, and the quarterly royalty statement (PRS distributes quarterly) reads the
+   rolls them up, and the quarterly royalty statement (PRS pays out four times a year, and members have three years to
+   claim live royalties, so old gigs are still worth scanning) reads the
    pre-rolled buckets instead of rescanning every play ever recorded. Each row carries the
    weakest evidence behind it and whether recall was needed, so a statement line is never
    stronger than its proof. On plain Postgres the same names are a table and a view (that's
@@ -86,10 +91,10 @@ from seeds, so the numbers are deterministic end to end.
   [docs/corpus-licenses.md](docs/corpus-licenses.md)). Real-world audio is harder; the CLAP
   layer exists for exactly that, but the 100% bench numbers are for this corpus, not a claim
   about club recordings at large.
-- Tempo robustness is swept over ±10%; harder transforms (key shifts, loops, mashups) land in
-  *review*, by design — flagged, never guessed.
-- PRS filing itself stays manual: SetLedger produces the evidence pack in the right shape; it
-  does not submit to PRS.
+- The tempo sweep covers ±10%, but the benchmark only tests +6% and −5%. Harder transforms
+  (key shifts, loops, mashups) land in *review* by design.
+- PRS filing itself stays manual: SetLedger produces the setlist and the evidence behind it;
+  it does not submit anything to PRS.
 - Scan state lives in memory behind one server — a deliberate single-venue scope, not a
   multi-tenant service.
 

@@ -96,7 +96,7 @@ function finishScanUI(sc) {
   $("stage-status").textContent = sc.elapsed ? `scanned in ${sc.elapsed}s` : "";
   $("scan-btn").hidden = true;
   const n = S.plays.filter((p) => p.status === "matched").length;
-  $("export-btn").textContent = `Download PRS pack (${n} plays)`;
+  $("export-btn").textContent = `Download setlist report (${n} plays)`;
   $("export-btn").hidden = false;
   $("again-btn").hidden = false;
   draw(); renderClaims();

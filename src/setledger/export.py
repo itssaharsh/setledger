@@ -1,4 +1,5 @@
-"""Royalty submission pack: CSV in a PRS-reportable field layout + a human PDF cover sheet.
+"""Setlist report: CSV with what a PRS live-performance report asks for (date, venue, each
+work and its duration; writers come from the registered work) + a human PDF cover sheet.
 
 Deterministic by design: rows come only from matched plays; every row carries the
 confidence and method that produced it; unregistered tracks are flagged, never hidden.
@@ -77,7 +78,7 @@ def _write_pdf(rows: list[dict], meta: PackMeta, plays: list[Play], path: Path) 
                             leftMargin=12 * mm, rightMargin=12 * mm)
     review_n = sum(1 for p in plays if p.status == "review")
     story = [
-        Paragraph("SetLedger — royalty submission pack", styles["Title"]),
+        Paragraph("SetLedger — setlist report", styles["Title"]),
         Paragraph(f"Performance {meta.performance_date} · {meta.venue} · source set: {meta.set_name}", styles["Normal"]),
         Paragraph(f"{len(rows)} matched plays · {review_n} segments left for manual review · "
                   "every row carries the fingerprint confidence that produced it; no play is "
