@@ -1,10 +1,8 @@
-"""PgStore against a live pgvector Postgres (Tiger Data or local docker).
+"""PgStore against a live pgvector Postgres (Tiger Data, env DSN, or embedded pgserver).
 
-Skipped when no DSN is reachable. DSN sources, in order:
-SETLEDGER_PG_DSN env var, then ~/.config/setledger/tiger_dsn.
-Everything runs in a throwaway schema and is dropped afterwards.
+DSN resolution lives in conftest.pg_dsn. Everything runs in a throwaway schema that is
+dropped afterwards, so a shared managed service is never touched outside it.
 """
-import os
 import sys
 import uuid
 from pathlib import Path
@@ -16,21 +14,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from setledger.store import PgStore
 
 
-def _dsn() -> str | None:
-    if os.environ.get("SETLEDGER_PG_DSN"):
-        return os.environ["SETLEDGER_PG_DSN"]
-    f = Path.home() / ".config" / "setledger" / "tiger_dsn"
-    if f.exists():
-        dsn = f.read_text().strip()
-        return dsn or None
-    return None
-
-
 @pytest.fixture(scope="module")
-def store():
-    dsn = _dsn()
-    if not dsn:
-        pytest.skip("no live Postgres DSN (set SETLEDGER_PG_DSN or ~/.config/setledger/tiger_dsn)")
+def store(pg_dsn):
+    dsn, _source = pg_dsn
     try:
         s = PgStore(dsn, dim=8, schema=f"sl_test_{uuid.uuid4().hex[:8]}")
     except Exception as e:

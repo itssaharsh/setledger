@@ -1,442 +1,446 @@
 {
- "suite": ".venv/bin/python -m pytest -q",
- "tasks": [
-  {
-   "id": "T01",
-   "objective": "Demo corpus + synthetic mix generator: fetch/verify ~25 CC-licensed tracks (license lines recorded), build mixgen that renders sets from crate segments (clean, tempo-shifted, foreign) with ground-truth JSON",
-   "deps": [],
-   "writes": [
-    "src/setledger/mixgen.py",
-    "data/",
-    "scripts/fetch_corpus.py",
-    "tests/test_mixgen.py",
-    "docs/corpus-licenses.md"
-   ],
-   "runtime": {},
-   "kind": "feature",
-   "acceptance": [
-    "mixgen produces a wav + truth JSON with segment boundaries",
-    "every corpus file has a recorded license"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q tests/test_mixgen.py"
-   ],
-   "rollback": "git revert task commits",
-   "title": "Corpus + mix generator",
-   "milestone": "M1 vertical slice",
-   "status": "done",
-   "base": "29cac3b",
-   "started_after": 0,
-   "evidence": [
-    "E0003",
-    "E0004"
-   ]
-  },
-  {
-   "id": "T02",
-   "objective": "Crate indexer: ffmpeg decode -> windowed chromaprint fingerprints via fpcalc -> store (storage interface with pg driver; local docker pg or Tiger DSN)",
-   "deps": [
-    "T01"
-   ],
-   "writes": [
-    "src/setledger/decode.py",
-    "src/setledger/fingerprint.py",
-    "src/setledger/store.py",
-    "tests/test_index.py",
-    "docker-compose.yml"
-   ],
-   "runtime": {},
-   "kind": "feature",
-   "acceptance": [
-    ">=20-track crate indexes; skipped files reported",
-    "re-index is idempotent"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q tests/test_index.py"
-   ],
-   "rollback": "git revert",
-   "title": "Crate indexer",
-   "milestone": "M1 vertical slice",
-   "status": "done",
-   "base": "e5d9883",
-   "started_after": 4,
-   "evidence": [
-    "E0006",
-    "E0007"
-   ]
-  },
-  {
-   "id": "T03",
-   "objective": "Set scanner: sliding-window exact matching -> Play rows with t_start/t_end, confidence, status matched|review|unmatched; never invents a track",
-   "deps": [
-    "T02"
-   ],
-   "writes": [
-    "src/setledger/scan.py",
-    "tests/test_scan.py"
-   ],
-   "runtime": {},
-   "kind": "feature",
-   "acceptance": [
-    "unmatched segments emit status=review, never a fabricated track_id",
-    "timestamps within \u00b12s of truth on clean segments"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q tests/test_scan.py"
-   ],
-   "rollback": "git revert",
-   "title": "Set scanner (exact)",
-   "milestone": "M1 vertical slice",
-   "status": "done",
-   "base": "4931118",
-   "started_after": 7,
-   "evidence": [
-    "E0010",
-    "E0011"
-   ]
-  },
-  {
-   "id": "T04",
-   "objective": "Benchmark harness: run scanner over mixgen sets, compute ID rate/precision per difficulty tier, CLI table + JSON artifact; thresholds asserted (clean >=90%)",
-   "deps": [
-    "T03"
-   ],
-   "writes": [
-    "src/setledger/bench.py",
-    "tests/test_bench.py"
-   ],
-   "runtime": {},
-   "kind": "feature",
-   "acceptance": [
-    "bench table prints tiers with ID rate and precision",
-    "clean-tier threshold asserted in tests"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q tests/test_bench.py"
-   ],
-   "rollback": "git revert",
-   "title": "Benchmark harness",
-   "milestone": "M1 vertical slice",
-   "status": "done",
-   "base": "01f5fc8",
-   "started_after": 11,
-   "evidence": [
-    "E0016",
-    "E0017"
-   ]
-  },
-  {
-   "id": "T05",
-   "objective": "PRS-format pack export: CSV + PDF from matched plays with confidence+method columns; golden-file test; unreleased-track flags",
-   "deps": [
-    "T03"
-   ],
-   "writes": [
-    "src/setledger/export.py",
-    "tests/test_export.py",
-    "src/setledger/templates/"
-   ],
-   "runtime": {},
-   "kind": "feature",
-   "acceptance": [
-    "rows == matched plays; golden file stable",
-    "unreleased flag column present"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q tests/test_export.py"
-   ],
-   "rollback": "git revert",
-   "title": "PRS pack export",
-   "milestone": "M1 vertical slice",
-   "status": "done",
-   "base": "ffe817f",
-   "started_after": 17,
-   "evidence": [
-    "E0022",
-    "E0023"
-   ]
-  },
-  {
-   "id": "T13",
-   "objective": "Backup take: record the CLI vertical slice working end to end (index -> scan -> bench -> export) as GIF/screens for the post",
-   "deps": [
-    "T04",
-    "T05"
-   ],
-   "writes": [
-    "docs/media/"
-   ],
-   "runtime": {},
-   "kind": "record",
-   "acceptance": [
-    "GIF + bench-table screenshot exist"
-   ],
-   "verify": [
-    "ls docs/media"
-   ],
-   "rollback": "n/a",
-   "title": "Backup take (record)",
-   "milestone": "M1 vertical slice",
-   "status": "done",
-   "base": "4f3e0dd",
-   "started_after": 23,
-   "evidence": [
-    "E0027",
-    "E0028"
-   ]
-  },
-  {
-   "id": "T06",
-   "objective": "pgvector online: docker-compose pg up locally (or Tiger Data DSN when user provides); embeddings table + cosine top-k + hybrid tag+vector query",
-   "deps": [
-    "T02"
-   ],
-   "writes": [
-    "src/setledger/store.py",
-    "tests/test_store_vector.py",
-    "docker-compose.yml"
-   ],
-   "runtime": {
-    "ports": [
-     5432
-    ]
-   },
-   "kind": "feature",
-   "acceptance": [
-    "top-k cosine query returns planted neighbor",
-    "hybrid tag+vector query works"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q tests/test_store_vector.py"
-   ],
-   "rollback": "git revert",
-   "title": "pgvector store online",
-   "milestone": "M2 intelligence",
-   "status": "doing",
-   "base": "b021220",
-   "started_after": 52
-  },
-  {
-   "id": "T07",
-   "objective": "Embedding fallback: MERT/CLAP windows -> pgvector match for segments exact missed; +6% tempo tier >=50% in bench; degraded exact-only mode with banner flag; store-agnostic (MemoryStore brute-force nearest_windows for tests/degraded local; PgStore verified in T06)",
-   "deps": [
-    "T04"
-   ],
-   "writes": [
-    "src/setledger/embed.py",
-    "src/setledger/scan.py",
-    "tests/test_embed.py",
-    "tests/test_degraded.py"
-   ],
-   "runtime": {},
-   "kind": "feature",
-   "acceptance": [
-    "shifted tier matched via method=embedding at >=50%",
-    "model-unavailable -> exact-only mode flagged"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q tests/test_embed.py tests/test_degraded.py"
-   ],
-   "rollback": "git revert",
-   "title": "Embedding fallback + degraded mode",
-   "milestone": "M2 intelligence",
-   "status": "done",
-   "base": "34cbd89",
-   "started_after": 40,
-   "evidence": [
-    "E0045",
-    "E0046"
-   ]
-  },
-  {
-   "id": "T08",
-   "objective": "Gemma tag normalization via ollama with strict passthrough fallback; before/after table artifact",
-   "deps": [
-    "T02"
-   ],
-   "writes": [
-    "src/setledger/tags.py",
-    "tests/test_tags.py"
-   ],
-   "runtime": {},
-   "kind": "feature",
-   "acceptance": [
-    "messy tag -> canonical suggestion with confidence; fallback passthrough when model absent"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q tests/test_tags.py"
-   ],
-   "rollback": "git revert",
-   "title": "Gemma tag normalization",
-   "milestone": "M2 intelligence",
-   "status": "done",
-   "base": "46511e9",
-   "started_after": 28,
-   "evidence": [
-    "E0039",
-    "E0040"
-   ]
-  },
-  {
-   "id": "T09",
-   "objective": "FastAPI app + single-page UI: crate panel, scan progress, confidence timeline, chips (embedding/review), export button; all contract s5 states incl. degraded banner; seeded demo mode",
-   "deps": [
-    "T05",
-    "T07"
-   ],
-   "writes": [
-    "src/setledger/app.py",
-    "src/setledger/static/",
-    "tests/test_app.py"
-   ],
-   "runtime": {
-    "ports": [
-     8000
-    ]
-   },
-   "kind": "feature",
-   "acceptance": [
-    "J3 runs signed-out on seeded data",
-    "states: loading/empty/error/review/degraded all reachable via ?state= or real paths"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q tests/test_app.py"
-   ],
-   "rollback": "git revert",
-   "title": "Web UI + seeded demo",
-   "milestone": "M3 surface",
-   "status": "done",
-   "base": "cd776a7",
-   "started_after": 46,
-   "evidence": [
-    "E0049",
-    "E0050"
-   ]
-  },
-  {
-   "id": "T10",
-   "objective": "Merged gate: security (no secrets, upload cap, dependency sanity) + cleanup (dead code, temp scripts) + design pass on the one page",
-   "deps": [
-    "T09"
-   ],
-   "writes": [
-    "src/",
-    "tests/"
-   ],
-   "runtime": {},
-   "kind": "check",
-   "acceptance": [
-    "secrets scan clean; upload cap enforced and tested; no stray debug files"
-   ],
-   "verify": [
-    ".venv/bin/python -m pytest -q",
-    "git grep -l 'TODO-DEBUG' -- src || true"
-   ],
-   "rollback": "n/a",
-   "title": "Security/cleanup/design gate",
-   "milestone": "M3 surface",
-   "status": "done",
-   "base": "d65af80",
-   "started_after": 50,
-   "evidence": [
-    "E0051",
-    "E0052"
-   ]
-  },
-  {
-   "id": "T11",
-   "objective": "Deploy to DigitalOcean via scripts/deploy_do.sh (doctl v2, s-1vcpu-2gb nyc3, Caddy TLS, systemd, CLAP live); attach setledger.risp.tech (A record); smoke the live URL",
-   "deps": [
-    "T10"
-   ],
-   "writes": [
-    "deploy/",
-    "scripts/deploy_do.sh"
-   ],
-   "runtime": {},
-   "kind": "deploy",
-   "acceptance": [
-    "live URL serves seeded demo signed out",
-    "smoke passes"
-   ],
-   "verify": [
-    "bash -n scripts/deploy_do.sh",
-    "curl -fs https://setledger.risp.tech/api/state"
-   ],
-   "rollback": "destroy droplet",
-   "title": "Deploy DO + .tech",
-   "milestone": "M3 surface"
-  },
-  {
-   "id": "T12",
-   "objective": "Final bench numbers + README first screen (judge card line, GIF, bench table, links) + PRS registration/filing; deployed URL attempt documented",
-   "deps": [
-    "T07",
-    "T11"
-   ],
-   "writes": [
-    "README.md",
-    "docs/media/",
-    "docs/filing.md"
-   ],
-   "runtime": {},
-   "kind": "docs",
-   "acceptance": [
-    "README first screen = judge card + GIF + live link",
-    "filing attempt documented truthfully"
-   ],
-   "verify": [
-    "ls README.md"
-   ],
-   "rollback": "git revert",
-   "title": "Final numbers + README",
-   "milestone": "M4 ship"
-  },
-  {
-   "id": "T14",
-   "objective": "Final take at freeze: re-record GIFs/screens from the deployed URL",
-   "deps": [
-    "T12"
-   ],
-   "writes": [
-    "docs/media/"
-   ],
-   "runtime": {},
-   "kind": "record",
-   "acceptance": [
-    "final media from live URL"
-   ],
-   "verify": [
-    "ls docs/media"
-   ],
-   "rollback": "n/a",
-   "title": "Final take (record)",
-   "milestone": "M4 ship"
-  },
-  {
-   "id": "T15",
-   "objective": "Submit: write the DEV post (2000-2900 words, template sections, named-job partner sections, candid section, Prize Categories list), the MLH #mlhacks post, publish, pb submit check --online",
-   "deps": [
-    "T14"
-   ],
-   "writes": [
-    "docs/post-dev.md",
-    "docs/post-mlh.md"
-   ],
-   "runtime": {},
-   "kind": "submit",
-   "acceptance": [
-    "post published before 2026-10-18 23:59 PDT with tags devchallenge+hf26challenge",
-    "submit check passes"
-   ],
-   "verify": [
-    "python3 .prod-build/pb.py submit check --description docs/post-dev.md --live placeholder --online"
-   ],
-   "rollback": "n/a",
-   "title": "Posts + submit",
-   "milestone": "M4 ship"
-  }
- ],
- "mode": "hackathon",
- "base": "29cac3b"
+  "suite": ".venv/bin/python -m pytest -q",
+  "tasks": [
+    {
+      "id": "T01",
+      "objective": "Demo corpus + synthetic mix generator: fetch/verify ~25 CC-licensed tracks (license lines recorded), build mixgen that renders sets from crate segments (clean, tempo-shifted, foreign) with ground-truth JSON",
+      "deps": [],
+      "writes": [
+        "src/setledger/mixgen.py",
+        "data/",
+        "scripts/fetch_corpus.py",
+        "tests/test_mixgen.py",
+        "docs/corpus-licenses.md"
+      ],
+      "runtime": {},
+      "kind": "feature",
+      "acceptance": [
+        "mixgen produces a wav + truth JSON with segment boundaries",
+        "every corpus file has a recorded license"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q tests/test_mixgen.py"
+      ],
+      "rollback": "git revert task commits",
+      "title": "Corpus + mix generator",
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "29cac3b",
+      "started_after": 0,
+      "evidence": [
+        "E0003",
+        "E0004"
+      ]
+    },
+    {
+      "id": "T02",
+      "objective": "Crate indexer: ffmpeg decode -> windowed chromaprint fingerprints via fpcalc -> store (storage interface with pg driver; local docker pg or Tiger DSN)",
+      "deps": [
+        "T01"
+      ],
+      "writes": [
+        "src/setledger/decode.py",
+        "src/setledger/fingerprint.py",
+        "src/setledger/store.py",
+        "tests/test_index.py",
+        "docker-compose.yml"
+      ],
+      "runtime": {},
+      "kind": "feature",
+      "acceptance": [
+        ">=20-track crate indexes; skipped files reported",
+        "re-index is idempotent"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q tests/test_index.py"
+      ],
+      "rollback": "git revert",
+      "title": "Crate indexer",
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "e5d9883",
+      "started_after": 4,
+      "evidence": [
+        "E0006",
+        "E0007"
+      ]
+    },
+    {
+      "id": "T03",
+      "objective": "Set scanner: sliding-window exact matching -> Play rows with t_start/t_end, confidence, status matched|review|unmatched; never invents a track",
+      "deps": [
+        "T02"
+      ],
+      "writes": [
+        "src/setledger/scan.py",
+        "tests/test_scan.py"
+      ],
+      "runtime": {},
+      "kind": "feature",
+      "acceptance": [
+        "unmatched segments emit status=review, never a fabricated track_id",
+        "timestamps within ±2s of truth on clean segments"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q tests/test_scan.py"
+      ],
+      "rollback": "git revert",
+      "title": "Set scanner (exact)",
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "4931118",
+      "started_after": 7,
+      "evidence": [
+        "E0010",
+        "E0011"
+      ]
+    },
+    {
+      "id": "T04",
+      "objective": "Benchmark harness: run scanner over mixgen sets, compute ID rate/precision per difficulty tier, CLI table + JSON artifact; thresholds asserted (clean >=90%)",
+      "deps": [
+        "T03"
+      ],
+      "writes": [
+        "src/setledger/bench.py",
+        "tests/test_bench.py"
+      ],
+      "runtime": {},
+      "kind": "feature",
+      "acceptance": [
+        "bench table prints tiers with ID rate and precision",
+        "clean-tier threshold asserted in tests"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q tests/test_bench.py"
+      ],
+      "rollback": "git revert",
+      "title": "Benchmark harness",
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "01f5fc8",
+      "started_after": 11,
+      "evidence": [
+        "E0016",
+        "E0017"
+      ]
+    },
+    {
+      "id": "T05",
+      "objective": "PRS-format pack export: CSV + PDF from matched plays with confidence+method columns; golden-file test; unreleased-track flags",
+      "deps": [
+        "T03"
+      ],
+      "writes": [
+        "src/setledger/export.py",
+        "tests/test_export.py",
+        "src/setledger/templates/"
+      ],
+      "runtime": {},
+      "kind": "feature",
+      "acceptance": [
+        "rows == matched plays; golden file stable",
+        "unreleased flag column present"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q tests/test_export.py"
+      ],
+      "rollback": "git revert",
+      "title": "PRS pack export",
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "ffe817f",
+      "started_after": 17,
+      "evidence": [
+        "E0022",
+        "E0023"
+      ]
+    },
+    {
+      "id": "T13",
+      "objective": "Backup take: record the CLI vertical slice working end to end (index -> scan -> bench -> export) as GIF/screens for the post",
+      "deps": [
+        "T04",
+        "T05"
+      ],
+      "writes": [
+        "docs/media/"
+      ],
+      "runtime": {},
+      "kind": "record",
+      "acceptance": [
+        "GIF + bench-table screenshot exist"
+      ],
+      "verify": [
+        "ls docs/media"
+      ],
+      "rollback": "n/a",
+      "title": "Backup take (record)",
+      "milestone": "M1 vertical slice",
+      "status": "done",
+      "base": "4f3e0dd",
+      "started_after": 23,
+      "evidence": [
+        "E0027",
+        "E0028"
+      ]
+    },
+    {
+      "id": "T06",
+      "objective": "pgvector online: docker-compose pg up locally (or Tiger Data DSN when user provides); embeddings table + cosine top-k + hybrid tag+vector query",
+      "deps": [
+        "T02"
+      ],
+      "writes": [
+        "src/setledger/store.py",
+        "tests/test_store_vector.py",
+        "docker-compose.yml"
+      ],
+      "runtime": {
+        "ports": [
+          5432
+        ]
+      },
+      "kind": "feature",
+      "acceptance": [
+        "top-k cosine query returns planted neighbor",
+        "hybrid tag+vector query works"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q tests/test_store_vector.py"
+      ],
+      "rollback": "git revert",
+      "title": "pgvector store online",
+      "milestone": "M2 intelligence",
+      "status": "done",
+      "base": "b021220",
+      "started_after": 52,
+      "evidence": [
+        "E0063",
+        "E0064"
+      ]
+    },
+    {
+      "id": "T07",
+      "objective": "Embedding fallback: MERT/CLAP windows -> pgvector match for segments exact missed; +6% tempo tier >=50% in bench; degraded exact-only mode with banner flag; store-agnostic (MemoryStore brute-force nearest_windows for tests/degraded local; PgStore verified in T06)",
+      "deps": [
+        "T04"
+      ],
+      "writes": [
+        "src/setledger/embed.py",
+        "src/setledger/scan.py",
+        "tests/test_embed.py",
+        "tests/test_degraded.py"
+      ],
+      "runtime": {},
+      "kind": "feature",
+      "acceptance": [
+        "shifted tier matched via method=embedding at >=50%",
+        "model-unavailable -> exact-only mode flagged"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q tests/test_embed.py tests/test_degraded.py"
+      ],
+      "rollback": "git revert",
+      "title": "Embedding fallback + degraded mode",
+      "milestone": "M2 intelligence",
+      "status": "done",
+      "base": "34cbd89",
+      "started_after": 40,
+      "evidence": [
+        "E0045",
+        "E0046"
+      ]
+    },
+    {
+      "id": "T08",
+      "objective": "Gemma tag normalization via ollama with strict passthrough fallback; before/after table artifact",
+      "deps": [
+        "T02"
+      ],
+      "writes": [
+        "src/setledger/tags.py",
+        "tests/test_tags.py"
+      ],
+      "runtime": {},
+      "kind": "feature",
+      "acceptance": [
+        "messy tag -> canonical suggestion with confidence; fallback passthrough when model absent"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q tests/test_tags.py"
+      ],
+      "rollback": "git revert",
+      "title": "Gemma tag normalization",
+      "milestone": "M2 intelligence",
+      "status": "done",
+      "base": "46511e9",
+      "started_after": 28,
+      "evidence": [
+        "E0039",
+        "E0040"
+      ]
+    },
+    {
+      "id": "T09",
+      "objective": "FastAPI app + single-page UI: crate panel, scan progress, confidence timeline, chips (embedding/review), export button; all contract s5 states incl. degraded banner; seeded demo mode",
+      "deps": [
+        "T05",
+        "T07"
+      ],
+      "writes": [
+        "src/setledger/app.py",
+        "src/setledger/static/",
+        "tests/test_app.py"
+      ],
+      "runtime": {
+        "ports": [
+          8000
+        ]
+      },
+      "kind": "feature",
+      "acceptance": [
+        "J3 runs signed-out on seeded data",
+        "states: loading/empty/error/review/degraded all reachable via ?state= or real paths"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q tests/test_app.py"
+      ],
+      "rollback": "git revert",
+      "title": "Web UI + seeded demo",
+      "milestone": "M3 surface",
+      "status": "done",
+      "base": "cd776a7",
+      "started_after": 46,
+      "evidence": [
+        "E0049",
+        "E0050"
+      ]
+    },
+    {
+      "id": "T10",
+      "objective": "Merged gate: security (no secrets, upload cap, dependency sanity) + cleanup (dead code, temp scripts) + design pass on the one page",
+      "deps": [
+        "T09"
+      ],
+      "writes": [
+        "src/",
+        "tests/"
+      ],
+      "runtime": {},
+      "kind": "check",
+      "acceptance": [
+        "secrets scan clean; upload cap enforced and tested; no stray debug files"
+      ],
+      "verify": [
+        ".venv/bin/python -m pytest -q",
+        "git grep -l 'TODO-DEBUG' -- src || true"
+      ],
+      "rollback": "n/a",
+      "title": "Security/cleanup/design gate",
+      "milestone": "M3 surface",
+      "status": "done",
+      "base": "d65af80",
+      "started_after": 50,
+      "evidence": [
+        "E0051",
+        "E0052"
+      ]
+    },
+    {
+      "id": "T11",
+      "objective": "Deploy to DigitalOcean via scripts/deploy_do.sh (doctl v2, s-1vcpu-2gb nyc3, Caddy TLS, systemd, CLAP live); attach setledger.risp.tech (A record); smoke the live URL",
+      "deps": [
+        "T10"
+      ],
+      "writes": [
+        "deploy/",
+        "scripts/deploy_do.sh"
+      ],
+      "runtime": {},
+      "kind": "deploy",
+      "acceptance": [
+        "live URL serves seeded demo signed out",
+        "smoke passes"
+      ],
+      "verify": [
+        "bash -n scripts/deploy_do.sh",
+        "curl -fs https://setledger.risp.tech/api/state"
+      ],
+      "rollback": "destroy droplet",
+      "title": "Deploy DO + .tech",
+      "milestone": "M3 surface"
+    },
+    {
+      "id": "T12",
+      "objective": "Final bench numbers + README first screen (judge card line, GIF, bench table, links) + PRS registration/filing; deployed URL attempt documented",
+      "deps": [
+        "T07",
+        "T11"
+      ],
+      "writes": [
+        "README.md",
+        "docs/media/",
+        "docs/filing.md"
+      ],
+      "runtime": {},
+      "kind": "docs",
+      "acceptance": [
+        "README first screen = judge card + GIF + live link",
+        "filing attempt documented truthfully"
+      ],
+      "verify": [
+        "ls README.md"
+      ],
+      "rollback": "git revert",
+      "title": "Final numbers + README",
+      "milestone": "M4 ship"
+    },
+    {
+      "id": "T14",
+      "objective": "Final take at freeze: re-record GIFs/screens from the deployed URL",
+      "deps": [
+        "T12"
+      ],
+      "writes": [
+        "docs/media/"
+      ],
+      "runtime": {},
+      "kind": "record",
+      "acceptance": [
+        "final media from live URL"
+      ],
+      "verify": [
+        "ls docs/media"
+      ],
+      "rollback": "n/a",
+      "title": "Final take (record)",
+      "milestone": "M4 ship"
+    },
+    {
+      "id": "T15",
+      "objective": "Submit: write the DEV post (2000-2900 words, template sections, named-job partner sections, candid section, Prize Categories list), the MLH #mlhacks post, publish, pb submit check --online",
+      "deps": [
+        "T14"
+      ],
+      "writes": [
+        "docs/post-dev.md",
+        "docs/post-mlh.md"
+      ],
+      "runtime": {},
+      "kind": "submit",
+      "acceptance": [
+        "post published before 2026-10-18 23:59 PDT with tags devchallenge+hf26challenge",
+        "submit check passes"
+      ],
+      "verify": [
+        "python3 .prod-build/pb.py submit check --description docs/post-dev.md --live placeholder --online"
+      ],
+      "rollback": "n/a",
+      "title": "Posts + submit",
+      "milestone": "M4 ship"
+    }
+  ],
+  "mode": "hackathon",
+  "base": "29cac3b"
 }
