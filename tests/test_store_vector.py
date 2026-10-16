@@ -73,3 +73,17 @@ def test_set_embeddings_replaces(store, world):
     hits = store.nearest_windows(_vec(20), k=1)
     assert hits[0][0] == world["b"]
     assert not any(h[2] < 1e-5 for h in store.nearest_windows(_vec(10), k=2))
+
+
+def test_app_uses_pgvector_when_dsn_is_set(pg_dsn, monkeypatch):
+    import setledger.app as appmod
+    monkeypatch.setenv("SETLEDGER_PG_DSN", pg_dsn[0])
+    s, kind = appmod._open_store(8)
+    try:
+        assert kind == "pgvector" and s.count() == 0
+    finally:
+        s.drop_schema()
+        s.conn.close()
+    monkeypatch.delenv("SETLEDGER_PG_DSN")
+    _, kind = appmod._open_store(8)
+    assert kind == "memory"

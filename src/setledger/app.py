@@ -35,7 +35,7 @@ OUT = Path(os.environ.get("SETLEDGER_OUT", ROOT / "data" / "out"))
 REGISTERED = {"1000_Midnight_Harbour.wav"}
 
 state: dict = {
-    "ready": False, "degraded": True, "embedder": "none", "tracks": [], "skipped": [],
+    "ready": False, "degraded": True, "embedder": "none", "store": "memory", "tracks": [], "skipped": [],
     "waveform": [], "duration": 0.0,
     "scan": {"running": False, "phase": "idle", "step": 0, "total": 0, "file": "",
              "claims": [], "plays": [], "error": None, "elapsed": 0.0, "done": False},
@@ -68,11 +68,23 @@ def _waveform_peaks(path: Path, bins: int = 1200) -> tuple[list[float], float]:
     return peaks[:bins], n / sr
 
 
+def _open_store(dim: int):
+    """pgvector (Tiger Data or any Postgres) when SETLEDGER_PG_DSN is set, else in-memory.
+    One schema per embedding width, since a vector column has a fixed dimension."""
+    dsn = os.environ.get("SETLEDGER_PG_DSN")
+    if dsn:
+        from .store import PgStore
+        return PgStore(dsn, dim=dim, schema=f"setledger_vec{dim}"), "pgvector"
+    return MemoryStore(), "memory"
+
+
 def _load_world() -> None:
-    global _embedder
-    rep = index_crate(CRATE, _store, registered_files=REGISTERED)
+    global _embedder, _store
     emb, name = _pick_embedder()
     _embedder = emb
+    _store, store_kind = _open_store(getattr(emb, "dim", 64))
+    state["store"] = store_kind
+    rep = index_crate(CRATE, _store, registered_files=REGISTERED)
     if emb is not None:
         cache = CRATE.parent / f"crate_embeddings_{name}.npz"
         tracks = _store.all_tracks()

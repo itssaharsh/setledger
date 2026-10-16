@@ -23,7 +23,7 @@ from setledger.index import index_crate
 from setledger.ledger import Ledger, quarter_bounds
 from setledger.mixgen import build_set, standard_demo_plays
 from setledger.scan import scan_full
-from setledger.store import MemoryStore
+from setledger.store import PgStore
 
 ROOT = Path(__file__).parent.parent
 CRATE = ROOT / "data" / "crate"
@@ -53,21 +53,18 @@ def dsn_and_label():
 
 
 def main() -> int:
-    store = MemoryStore()
-    index_crate(CRATE, store, registered_files=REGISTERED)
-    tracks = store.all_tracks()
+    dsn, backend, srv = dsn_and_label()
     clap = ClapEmbedder()
     emb, emb_name = (clap, "clap") if clap.available() else (SpectralEmbedder(), "spectral")
+    # nomination runs through pgvector on the same database as the ledger
+    store = PgStore(dsn, dim=emb.dim, schema=f"setledger_vec{emb.dim}")
+    index_crate(CRATE, store, registered_files=REGISTERED)
+    tracks = store.all_tracks()
     cache = ROOT / "data" / f"crate_embeddings_{emb_name}.npz"
-    if cache.exists():
-        z = np.load(cache)
-        for t in tracks:
-            store.set_embeddings(t.id, z[t.file])
-    else:
-        for t in tracks:
-            store.set_embeddings(t.id, emb.embed_path(CRATE / t.file))
+    z = np.load(cache) if cache.exists() else None
+    for t in tracks:
+        store.set_embeddings(t.id, z[t.file] if z is not None else emb.embed_path(CRATE / t.file))
 
-    dsn, backend, srv = dsn_and_label()
     lg = Ledger(dsn, schema="setledger_demo")
     reg = {t.file: t.registered for t in tracks}
     totals = {t: {"total": 0, "identified": 0, "partial": 0} for t in ("clean", "shifted", "foreign")}
@@ -96,7 +93,7 @@ def main() -> int:
     lines = ["# Quarterly royalty statements (synthetic gigs)", "",
              f"Backend: **{backend}**, "
              f"{'TimescaleDB hypertable `plays` + continuous aggregate `plays_monthly`' if lg.timescale else 'plain table + view (TimescaleDB not installed here)'}. "
-             f"Recall driver: {emb_name}. {len(GIG_PLAN)} builder-owned synthetic gigs, scanned for real "
+             f"Recall driver: {emb_name}, nominating through pgvector on the same database. {len(GIG_PLAN)} builder-owned synthetic gigs, scanned for real "
              f"in {time.time() - t_all:.0f}s total.", ""]
     for q in (date(2026, 8, 1), date(2026, 10, 1)):
         a, b = quarter_bounds(q)
@@ -120,6 +117,7 @@ def main() -> int:
     print("\n".join(lines[-3:]))
     print(f"-> {OUT.relative_to(ROOT)}")
     lg.conn.close()
+    store.conn.close()
     if srv is not None:
         srv.cleanup()
     return 0

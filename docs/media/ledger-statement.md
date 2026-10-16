@@ -1,6 +1,6 @@
 # Quarterly royalty statements (synthetic gigs)
 
-Backend: **embedded Postgres 16 (pgserver)**, plain table + view (TimescaleDB not installed here). Recall driver: clap. 5 builder-owned synthetic gigs, scanned for real in 104s total.
+Backend: **embedded Postgres 16 (pgserver)**, plain table + view (TimescaleDB not installed here). Recall driver: clap, nominating through pgvector on the same database. 5 builder-owned synthetic gigs, scanned for real in 108s total.
 
 ## Q3 2026 — 3 gigs
 
