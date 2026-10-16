@@ -50,6 +50,11 @@ for _ in $(seq 1 40); do "${SSH[@]}" true 2>/dev/null && break; sleep 5; done
 
 echo "shipping $(git rev-parse --short HEAD)…"
 git archive --format=tar HEAD | "${SSH[@]}" 'mkdir -p /opt/setledger && tar -x -C /opt/setledger'
+TIGER="$HOME/.config/setledger/tiger_dsn"
+if [ -s "$TIGER" ]; then   # the live demo nominates through pgvector on Tiger Data
+  printf 'SETLEDGER_PG_DSN="%s"\n' "$(<"$TIGER")" \
+    | "${SSH[@]}" 'umask 077; cat > /etc/setledger.env'
+fi
 "${SSH[@]}" "bash /opt/setledger/deploy/bootstrap.sh '$DOMAIN'"
 
 echo "smoke: waiting for the demo world…"

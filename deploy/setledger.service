@@ -8,6 +8,8 @@ User=setledger
 WorkingDirectory=/opt/setledger
 Environment=HOME=/opt/setledger
 Environment=SETLEDGER_EMBEDDER=auto
+# SETLEDGER_PG_DSN (Tiger Data) lives here, root-only, written by scripts/deploy_do.sh
+EnvironmentFile=-/etc/setledger.env
 ExecStart=/opt/setledger/.venv/bin/uvicorn setledger.app:app --app-dir src --host 127.0.0.1 --port 8000
 Restart=on-failure
 RestartSec=3
