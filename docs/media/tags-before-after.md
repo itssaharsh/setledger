@@ -1,6 +1,6 @@
 # Tag normalization — before/after (synthetic demo tags)
 
-Model: Gemma 3 1B (ollama, local CPU). 14/25 tags normalized; 7 rows degraded to passthrough by the vocabulary guard.
+Model: gemma3:1b via local ollama. 14/25 tags normalized; 7 rows degraded to passthrough by the vocabulary guard.
 
 | file | raw | suggestion | conf | method |
 |---|---|---|---|---|
@@ -10,7 +10,7 @@ Model: Gemma 3 1B (ollama, local CPU). 14/25 tags normalized; 7 rows degraded to
 | 1003_Neon_Garden.wav | Night feat. Shift Audio — Neon Garden   master | (unchanged) | 0.00 | passthrough |
 | 1004_Hollow_Meridian.wav | Delta feat. Verma — Hollow Meridian   master | (unchanged) | 0.00 | passthrough |
 | 1005_Amber_Fracture.wav | Kolkata Transit — Amber Fracture | (unchanged) | 0.90 | gemma |
-| 1006_Paper_Motor.wav | low orbit club — PAPER_MOTOR_FINAL_v2 | low orbit club — Paper Motor Final v2 | 0.90 | gemma |
+| 1006_Paper_Motor.wav | low orbit club — PAPER_MOTOR_FINAL_v2 | Low Orbit Club — Paper Motor | 0.90 | gemma |
 | 1007_Glass_Circuit.wav | unknown — Analog Debt - glass circuit | Analog Debt — Glass Circuit | 0.75 | gemma |
 | 1008_Iron_Tide.wav | NIGHT SHIFT AUDIO — Iron Tide (extended MIX) [320] | Night Shift Audio — Iron Tide [extended MIX] | 0.95 | gemma |
 | 1009_Wild_Echo.wav | delta verma — WILD_ECHO_FINAL_v2 | (unchanged) | 0.00 | passthrough |
@@ -25,8 +25,8 @@ Model: Gemma 3 1B (ollama, local CPU). 14/25 tags normalized; 7 rows degraded to
 | 1018_Iron_Fracture.wav | Night Shift Audio — Iron Fracture | (unchanged) | 0.90 | gemma |
 | 1019_Wild_Motor.wav | Delta feat. Verma — Wild Motor   master | (unchanged) | 0.00 | passthrough |
 | 1020_Midnight_Meridian.wav | Kolkata feat. Transit — Midnight Meridian   master | (unchanged) | 0.00 | passthrough |
-| 1021_Velvet_Fracture.wav | LOW ORBIT CLUB — Velvet Fracture (extended MIX) [320] | LOW ORBIT CLUB — Velvet Fracture [extended MIX] | 0.90 | gemma |
-| 1022_Static_Motor.wav | analog debt — STATIC_MOTOR_FINAL_v2 | Analog Debt — Static Motor Final v2 | 0.95 | gemma |
+| 1021_Velvet_Fracture.wav | LOW ORBIT CLUB — Velvet Fracture (extended MIX) [320] | Low Orbit Club — Velvet Fracture [extended MIX] | 0.90 | gemma |
+| 1022_Static_Motor.wav | analog debt — STATIC_MOTOR_FINAL_v2 | Analog Debt — Static Motor | 0.95 | gemma |
 | 1023_Neon_Circuit.wav | Night Shift Audio — Neon Circuit | (unchanged) | 0.90 | gemma |
 | 1024_Hollow_Tide.wav | unknown — Delta Verma - hollow tide | Delta Verma — Hollow Tide | 0.75 | gemma |
 

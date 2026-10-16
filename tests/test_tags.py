@@ -147,3 +147,14 @@ def test_openai_compat_client_against_fake_server():
         assert seen["body"]["model"] == "gemma-test" and seen["body"]["temperature"] == 0
     finally:
         srv.shutdown()
+
+
+def test_strip_junk_suffix_and_case():
+    from setledger.tags import fix_case, strip_junk_suffix
+    assert strip_junk_suffix("Paper Motor Final v2") == "Paper Motor"
+    assert strip_junk_suffix("Iron Tide master 320") == "Iron Tide"
+    assert strip_junk_suffix("The Final") == "The Final"          # no strong marker: kept
+    assert strip_junk_suffix("v2") == "v2"                        # never empties a title
+    assert fix_case("low orbit club") == "Low Orbit Club"
+    assert fix_case("NIGHT SHIFT AUDIO") == "Night Shift Audio"
+    assert fix_case("DJ Sable") == "DJ Sable"                     # mixed case trusted

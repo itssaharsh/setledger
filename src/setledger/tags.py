@@ -151,6 +151,28 @@ def preclean(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").replace("_", " ")).strip()
 
 
+_JUNK_TAIL = re.compile(r"^(final|master|og|promo|v\d+|\d{3,4})$", re.I)
+_STRONG_JUNK = re.compile(r"^(master|v\d+|\d{3,4})$", re.I)
+
+
+def strip_junk_suffix(title: str) -> str:
+    """Drop a trailing run like 'Final v2' or 'master 320'. Only when the run holds a strong
+    marker (vN, a bitrate, 'master'), so a real title such as 'The Final' is left alone."""
+    toks = title.split()
+    i = len(toks)
+    while i > 1 and _JUNK_TAIL.match(toks[i - 1].strip("()[]")):
+        i -= 1
+    run = toks[i:]
+    if run and any(_STRONG_JUNK.match(t.strip("()[]")) for t in run):
+        return " ".join(toks[:i])
+    return title
+
+
+def fix_case(s: str) -> str:
+    """ALL CAPS or all lowercase names become Title Case; mixed case is trusted as written."""
+    return s.title() if s and (s.isupper() or s.islower()) else s
+
+
 PLACEHOLDER_ARTISTS = {"unknown", "unknown artist", "n/a", "various", "various artists", "va"}
 
 
@@ -218,7 +240,9 @@ def normalize_tags(rows, client: OllamaClient | None = None,
                     conf = min(1.0, max(0.0, float(parsed.get("confidence", 0.5))))
                 except (TypeError, ValueError):
                     conf = 0.5
-                new_t, new_a = parsed["title"].strip(), parsed["artist"].strip()
+                # the model does language; deterministic code finishes the facts
+                new_t = fix_case(strip_junk_suffix(parsed["title"].strip()))
+                new_a = fix_case(parsed["artist"].strip())
                 sug = TagSuggestion(file, title, artist, new_t, new_a, mix, feat, conf,
                                     "gemma", (new_t, new_a, mix, feat) != (title, artist, None, []))
         out.append(sug)
