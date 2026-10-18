@@ -87,7 +87,7 @@ from seeds, so the numbers are deterministic end to end.
    stronger than its proof. On plain Postgres the same names are a table and a view (that's
    how the tests run without a cloud account); `Ledger.timescale` reports which one is live.
    Example: [docs/media/ledger-statement.md](docs/media/ledger-statement.md).
-5. **Web UI** — FastAPI + a single canvas workspace ([UI-SPEC.md](UI-SPEC.md)). The hosted demo
+5. **Web UI** — FastAPI + a single canvas workspace. The hosted demo
    at the **.tech** domain is a static build of the same UI that replays one real recorded scan
    (`scripts/record_replay.py`, `scripts/build_static.py`), because a 30-second audio scan
    doesn't fit a serverless request. The full app deploys to any VM with

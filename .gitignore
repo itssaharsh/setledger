@@ -45,3 +45,11 @@ data/mixes/.tmp/
 docs/media/demo.mp4
 data/gigs/
 data/mixes/*.peaks.json
+# local workflow files, not part of the submission
+AGENTS.md
+CLAUDE.md
+UI-SPEC.md
+site/
+.prod-build/pb.py
+.prod-build/state.md
+.prod-build/event.json
