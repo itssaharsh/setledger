@@ -147,6 +147,14 @@ def _run_scan() -> None:
 
 OUT.mkdir(parents=True, exist_ok=True)  # before StaticFiles mounts below
 app = FastAPI(title="SetLedger")
+# the .tech page (a static host) drives this API from another origin
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=os.environ.get(
+        "SETLEDGER_CORS_ORIGINS",
+        "https://setledger.risp.tech,https://setledger.vercel.app").split(","),
+    allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
 @app.on_event("startup")

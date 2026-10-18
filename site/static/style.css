@@ -111,4 +111,5 @@ table.md th{color:var(--ink-muted);font-weight:500}
 #bench-body p{font-family:var(--ff-body);font-size:13px;white-space:normal;margin:4px 0}
 
 #replay-chip{display:inline-block;margin-left:12px;padding:2px 8px;font-size:12px;border:1px solid var(--line-input);border-radius:var(--r-sm);color:var(--warning);text-decoration:none;font-family:var(--ff-mono)}
+#replay-chip.live{color:var(--success)}
 @media (max-width:760px){#replay-chip{margin:6px 0 0}}

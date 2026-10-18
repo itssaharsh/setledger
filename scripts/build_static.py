@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent.parent
 SITE = ROOT / "site"
 REPO = sys.argv[1] if len(sys.argv) > 1 else ""
+LIVE = sys.argv[2] if len(sys.argv) > 2 else ""  # live API base, e.g. the Render URL
 
 
 def main() -> int:
@@ -24,11 +25,12 @@ def main() -> int:
         f.write("\n#replay-chip{display:inline-block;margin-left:12px;padding:2px 8px;font-size:12px;"
                 "border:1px solid var(--line-input);border-radius:var(--r-sm);color:var(--warning);"
                 "text-decoration:none;font-family:var(--ff-mono)}\n"
+                "#replay-chip.live{color:var(--success)}\n"
                 "@media (max-width:760px){#replay-chip{margin:6px 0 0}}\n")
     html = (ROOT / "src" / "setledger" / "static" / "index.html").read_text()
     tag = '<script src="/static/app.js"></script>'
     assert tag in html
-    shim = (f"<script>window.SETLEDGER_REPO = {json.dumps(REPO)};</script>\n"
+    shim = (f"<script>window.SETLEDGER_REPO = {json.dumps(REPO)}; window.SETLEDGER_LIVE = {json.dumps(LIVE)};</script>\n"
             '<script src="/static/replay.js"></script>\n')
     (SITE / "index.html").write_text(html.replace(tag, shim + tag))
     (SITE / "vercel.json").write_text(json.dumps({"cleanUrls": True, "trailingSlash": False}))
