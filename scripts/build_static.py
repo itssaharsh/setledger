@@ -32,6 +32,14 @@ def main() -> int:
             '<script src="/static/replay.js"></script>\n')
     (SITE / "index.html").write_text(html.replace(tag, shim + tag))
     (SITE / "vercel.json").write_text(json.dumps({"cleanUrls": True, "trailingSlash": False}))
+    # artifacts are re-read from docs/media on every build (same keys as the app's /api/bench)
+    media = ROOT / "docs" / "media"
+    bench = {f.stem: f.read_text() for f in sorted(media.glob("bench_*.txt"))}
+    for key, name in (("tags", "tags-before-after.md"), ("ledger", "ledger-statement.md")):
+        if (media / name).exists():
+            bench[key] = (media / name).read_text()
+    (SITE / "replay" / "bench.json").write_text(json.dumps(bench, separators=(",", ":")))
+    shutil.copy(media / "demo.gif", SITE / "demo.gif")
     n = sum(1 for p in SITE.rglob("*") if p.is_file())
     print(f"site/ ready: {n} files")
     return 0
