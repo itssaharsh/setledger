@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: setledger
+    runtime: docker
+    plan: starter
+    region: virginia          # same coast as the Tiger Data service (AWS us-east-1)
+    healthCheckPath: /api/state
+    envVars:
+      - key: SETLEDGER_PG_DSN # Tiger Data connection string; Render asks for it at setup
+        sync: false
+      - key: SETLEDGER_EMBEDDER
+        value: spectral

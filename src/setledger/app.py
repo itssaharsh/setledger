@@ -59,6 +59,21 @@ def _pick_embedder():
 
 
 def _waveform_peaks(path: Path, bins: int = 1200) -> tuple[list[float], float]:
+    """Peaks for the timeline, cached beside the recording: decoding a 7-minute WAV costs
+    ~300 MB transiently, which a 512 MB host can't spare at every start."""
+    cache = path.with_suffix(".peaks.json")
+    if cache.exists() and cache.stat().st_mtime >= path.stat().st_mtime:
+        d = json.loads(cache.read_text())
+        return d["peaks"], d["duration"]
+    peaks, dur = _compute_peaks(path, bins)
+    try:
+        cache.write_text(json.dumps({"peaks": [round(p, 4) for p in peaks], "duration": dur}))
+    except OSError:
+        pass
+    return peaks, dur
+
+
+def _compute_peaks(path: Path, bins: int) -> tuple[list[float], float]:
     with wavemod.open(str(path), "rb") as w:
         sr, n, ch = w.getframerate(), w.getnframes(), w.getnchannels()
         pcm = np.frombuffer(w.readframes(n), dtype=np.int16).reshape(-1, ch)

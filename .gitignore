@@ -44,3 +44,4 @@ data/out/
 data/mixes/.tmp/
 docs/media/demo.mp4
 data/gigs/
+data/mixes/*.peaks.json

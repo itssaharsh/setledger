@@ -1,0 +1,12 @@
+.git
+.venv
+site
+data/crate
+data/mixes/*.wav
+data/mixes/.tmp
+data/out
+data/.tmp_scan
+data/gigs
+docs/media/demo.mp4
+.prod-build/logs
+**/__pycache__
