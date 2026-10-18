@@ -8,16 +8,17 @@ in 46 UK venues; SetLedger runs the same technique for every other gig
 
 ![SetLedger scanning a set: exact claims land, then tempo-shifted plays are recovered (2x speed)](docs/media/demo.gif)
 
-**Live demo:** _URL coming at deploy (Oct 17–18)_ · **Demo video:** _link + length at final take_
+**Live demo:** [setledger.risp.tech](https://setledger.risp.tech) (mirror: [setledger.vercel.app](https://setledger.vercel.app)).
+The hosted demo replays one real scan recorded from this pipeline, labeled as a replay on
+screen; the scanner itself runs wherever you run the app (see *Run it locally*).
 
 **Stack, one line:** chromaprint fingerprints decide every claim; CLAP window embeddings in
 **Tiger Data** Postgres (pgvector) nominate candidates for unmatched segments; **Gemma** 3 1B
-normalizes crate tags under a no-invention guard; deployed on **DigitalOcean** behind a
-**.tech** domain.
+normalizes crate tags under a no-invention guard; the demo is served at a **.tech** domain.
 
 ## How to judge this in 90 seconds
 
-1. Press **Scan Saturday's set** on the live demo (seeded; no sign-in).
+1. Press **Scan Saturday's set** on the live demo (seeded, no sign-in; it replays a real recorded scan).
 2. Watch claims land on the waveform with confidence scores.
 3. Click a blue **≈** chip — that play is tempo-shifted +6%, nominated by embeddings and
    confirmed by fingerprints.
@@ -82,8 +83,11 @@ from seeds, so the numbers are deterministic end to end.
    stronger than its proof. On plain Postgres the same names are a table and a view (that's
    how the tests run without a cloud account); `Ledger.timescale` reports which one is live.
    Example: [docs/media/ledger-statement.md](docs/media/ledger-statement.md).
-5. **Web UI** — FastAPI + a single canvas workspace ([UI-SPEC.md](UI-SPEC.md)); deployed on
-   **DigitalOcean**, served at a **.tech** domain (links above when live).
+5. **Web UI** — FastAPI + a single canvas workspace ([UI-SPEC.md](UI-SPEC.md)). The hosted demo
+   at the **.tech** domain is a static build of the same UI that replays one real recorded scan
+   (`scripts/record_replay.py`, `scripts/build_static.py`), because a 30-second audio scan
+   doesn't fit a serverless request. The full app deploys to any VM with
+   `scripts/deploy_do.sh` (doctl + Caddy + systemd).
 
 ## Limits — what this is and isn't
 
