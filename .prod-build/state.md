@@ -17,18 +17,15 @@ Tags: Gemma 3 1B local, 14/25 normalized, 7 guarded to passthrough, 0 invented w
 - UI: legend card, job-naming tagline, join-running-scan, driver-honest claim text, Gemma +
   ledger artifacts one click from the crate panel, ?record=1&autoscan=1 recording mode.
 
-## PUBLISH BLOCKERS (Oct 18 21:30 IST; deadline Mon Oct 19 12:29 IST)
-DigitalOcean dropped (support never unblocked the account). Hosted demo = static replay of a
-real recorded scan on Vercel: https://setledger.vercel.app (verified signed-out, foldcheck PASS
-both sizes, judge path end to end). setledger.risp.tech attached on Vercel.
-1. Tiger: needs ~/.config/setledger/tiger_dsn -> run tests/test_ledger.py + ledger_demo.py on it.
-   If it never arrives: rewrite the Tiger paragraph to "verified on Postgres 16 + pgvector; the
-   TimescaleDB path is untested" and decide whether to still list the category.
-2. DNS: A record setledger.risp.tech -> 76.76.21.21 at get.tech (orderbox-dns).
-3. GitHub: "push as-is" or "rewrite approved", then gh repo create + push; rebuild site with
-   repo URL (scripts/build_static.py <url>) and redeploy so the replay chip links to it.
-4. Post: fill the GIF (upload docs/media/demo.gif in the dev.to editor) and repo link; Saharsh
-   publishes. Draft: ../hackathon-idea/hf26-week2-side-hustle/post-draft.md
+## SUBMISSION STATE (Oct 18 ~23:50 IST; deadline Mon Oct 19 12:29 IST)
+LIVE: https://setledger.risp.tech (Vercel static page, HTTPS) -> real scans on
+https://setledger.onrender.com (Render Starter, spectral, pgvector on Tiger); 6 s fallback to the
+labeled replay. Verified signed-out: live scan 25.6 s, 7 plays, report download, 0 errors;
+foldcheck PASS (finished-run state) both sizes. Tiger verified (11/11 incl. hypertable + cagg).
+Repo: github.com/itssaharsh/setledger PRIVATE (0 secrets in 39 commits).
+dev.to draft id 4873010 (unpublished), source ../hackathon-idea/hf26-week2-side-hustle/post-final.md.
+Remaining (Saharsh): "make it public" -> gh repo edit --visibility public; then Publish the draft.
+After judging: delete the Render service, rotate the Tiger password, revoke the dev.to key.
 
 ## Ops note
 Never `pkill -f <pattern>` from a Bash call whose own command line contains the pattern: it

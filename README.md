@@ -8,13 +8,15 @@ in 46 UK venues; SetLedger runs the same technique for every other gig
 
 ![SetLedger scanning a set: exact claims land, then tempo-shifted plays are recovered (2x speed)](docs/media/demo.gif)
 
-**Live demo:** [setledger.risp.tech](https://setledger.risp.tech) (mirror: [setledger.vercel.app](https://setledger.vercel.app)).
-The hosted demo replays one real scan recorded from this pipeline, labeled as a replay on
-screen; the scanner itself runs wherever you run the app (see *Run it locally*).
+**Live demo:** [setledger.risp.tech](https://setledger.risp.tech). Scans run for real on
+**Render** (`render.yaml` + `Dockerfile`), nominating through pgvector on **Tiger Data**. If the
+server doesn't answer within six seconds, the page falls back to a labeled replay of one real
+recorded scan, and the header says which one you're seeing.
 
 **Stack, one line:** chromaprint fingerprints decide every claim; CLAP window embeddings in
 **Tiger Data** Postgres (pgvector) nominate candidates for unmatched segments; **Gemma** 3 1B
-normalizes crate tags under a no-invention guard; the demo is served at a **.tech** domain.
+normalizes crate tags under a no-invention guard; the scanner runs on **Render** behind a
+**.tech** domain.
 
 ## How to judge this in 90 seconds
 
