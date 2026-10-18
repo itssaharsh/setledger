@@ -17,13 +17,18 @@ Tags: Gemma 3 1B local, 14/25 normalized, 7 guarded to passthrough, 0 invented w
 - UI: legend card, job-naming tagline, join-running-scan, driver-honest claim text, Gemma +
   ledger artifacts one click from the crate panel, ?record=1&autoscan=1 recording mode.
 
-## PUBLISH BLOCKERS (do not claim in the post until each is true)
-1. Tiger: run tests/test_ledger.py + scripts/ledger_demo.py against the Tiger DSN so the
-   hypertable/continuous-aggregate test passes and the artifact says TimescaleDB.
-   Needs: ~/.config/setledger/tiger_dsn (Saharsh's 30-second terminal save).
-2. DigitalOcean: live URL from scripts/deploy_do.sh setledger.risp.tech. Needs DO token.
-3. .tech: A record setledger.risp.tech -> droplet IP. Needs droplet IP + DNS panel access.
-4. Git history rewrite decision before first push (380 MB of removed audio in history).
+## PUBLISH BLOCKERS (Oct 18 21:30 IST; deadline Mon Oct 19 12:29 IST)
+DigitalOcean dropped (support never unblocked the account). Hosted demo = static replay of a
+real recorded scan on Vercel: https://setledger.vercel.app (verified signed-out, foldcheck PASS
+both sizes, judge path end to end). setledger.risp.tech attached on Vercel.
+1. Tiger: needs ~/.config/setledger/tiger_dsn -> run tests/test_ledger.py + ledger_demo.py on it.
+   If it never arrives: rewrite the Tiger paragraph to "verified on Postgres 16 + pgvector; the
+   TimescaleDB path is untested" and decide whether to still list the category.
+2. DNS: A record setledger.risp.tech -> 76.76.21.21 at get.tech (orderbox-dns).
+3. GitHub: "push as-is" or "rewrite approved", then gh repo create + push; rebuild site with
+   repo URL (scripts/build_static.py <url>) and redeploy so the replay chip links to it.
+4. Post: fill the GIF (upload docs/media/demo.gif in the dev.to editor) and repo link; Saharsh
+   publishes. Draft: ../hackathon-idea/hf26-week2-side-hustle/post-draft.md
 
 ## Ops note
 Never `pkill -f <pattern>` from a Bash call whose own command line contains the pattern: it
