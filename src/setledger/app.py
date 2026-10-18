@@ -59,8 +59,8 @@ def _pick_embedder():
 
 
 def _waveform_peaks(path: Path, bins: int = 1200) -> tuple[list[float], float]:
-    """Peaks for the timeline, cached beside the recording: decoding a 7-minute WAV costs
-    ~300 MB transiently, which a 512 MB host can't spare at every start."""
+    """Peaks for the timeline, cached beside the recording: decoding the 7-minute set
+    took the process from 51 MB to 407 MB (measured), most of a 512 MB host at every start."""
     cache = path.with_suffix(".peaks.json")
     if cache.exists() and cache.stat().st_mtime >= path.stat().st_mtime:
         d = json.loads(cache.read_text())

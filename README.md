@@ -8,6 +8,8 @@ in 46 UK venues; SetLedger runs the same technique for every other gig
 
 ![SetLedger scanning a set: exact claims land, then tempo-shifted plays are recovered (2x speed)](docs/media/demo.gif)
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/itssaharsh/setledger)
+
 **Live demo:** [setledger.risp.tech](https://setledger.risp.tech). Scans run for real on
 **Render** (`render.yaml` + `Dockerfile`), nominating through pgvector on **Tiger Data**. If the
 server doesn't answer within six seconds, the page falls back to a labeled replay of one real
